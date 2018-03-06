@@ -8,3 +8,7 @@ This effort is based on this [Sequelize+Express example](https://github.com/sequ
 
 - Original Template: [Github - Sequelize](https://github.com/sequelize/express-example)
 - pug: [pugjs.com](https://pugjs.org/api/getting-started.html)
+
+## ToDos:
+
+- remove unused packages from `package.json`

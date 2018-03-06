@@ -25,6 +25,7 @@ var config = require('./config/config');
 var dataAccess = require('./model/dataAccess')(config, mongoClient);
 
 app.use('/', require('./routes/index'));
+app.use('/api/', require('./controller/admin')(dataAccess));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -1,5 +1,5 @@
 var Promise = require('promise');
-var debug = require('debug')('startup');
+var debug = require('debug')('App');
 var f = require('util').format;
 
 module.exports = function(config, mongoClient) {
@@ -21,13 +21,23 @@ module.exports = function(config, mongoClient) {
   			throw err;
   			return null;
   		}
-  		console.log("Database connected");
   		debug("Database connected");
   		this.db = db;
 	});
 
 	this.getDb = function() {
 		return this.db;
+	};
+
+	this.createSource = function(source) {
+		return new Promise(function(fulfill, reject) {
+			db.collection('sources').insertOne(source, function(err, doc) {
+				if (err)
+					reject(err);
+				else
+					fulfill(doc);
+			});
+		});
 	};
 
 	// this.createLevel = function(level) {
