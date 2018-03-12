@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "DEBUG=startup node ./bin/www",
+    "start": "DEBUG=App node ./bin/www",
+    "debug": "DEBUG=App nodemon ./bin/www",
     "//": {
       "test": "npm run test-unit && npm run test-integration",
       "test-unit": "cross-env NODE_ENV=test ./node_modules/.bin/mocha test/unit/*.test.js",
@@ -16,8 +17,10 @@
     "cookie-parser": "^1.4.3",
     "debug": "^3.1.0",
     "express": "^4.16.2",
+    "mongodb": "^2.2.33",
     "morgan": "^1.7.0",
     "pg": "^6.1.0",
+    "promise": "^8.0.1",
     "pug": "^2.0.0-rc.4",
     "sequelize": "^3.23.6",
     "sequelize-cli": "^3.1.0",
