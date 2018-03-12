@@ -4,7 +4,6 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var mongoClient = require('mongodb').MongoClient;
 
 var app = express();
 
@@ -15,14 +14,14 @@ app.set('view engine', 'pug');
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 var config = require('./config/config');
 
-var dataAccess = require('./model/dataAccess')(config, mongoClient);
+var dataAccess = require('./model/dataAccess')(config);
 
 app.use('/', require('./routes/index'));
 app.use('/api/', require('./controller/admin')(dataAccess));
