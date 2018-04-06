@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var app = express();
+process.title = 'procTitle';
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -18,6 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/libs', express.static(path.join(__dirname, 'node_modules')));
 
 var config = require('./config/config');
 
