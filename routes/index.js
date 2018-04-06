@@ -1,11 +1,15 @@
 var express = require('express');
-var router  = express.Router();
+var router = express.Router();
+var debug = require('debug')('App');
 
-router.get('/', function(req, res) {
-    res.render('index', {
-      _title_: 'Boilerplate Bootstrap-NodeJS-Express App',
-      users: []
-    });
-});
+module.exports = function() {
 
-module.exports = router;
+  router.get('/', function(req, res) {
+      res.render('index', {
+        _title_: 'Boilerplate Bootstrap-NodeJS-Express App',
+        users: []
+      });
+  });
+
+  return router;
+}

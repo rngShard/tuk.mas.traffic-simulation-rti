@@ -21,7 +21,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/libs', express.static(path.join(__dirname, 'node_modules')));
 
-var config = require('./config/config');
+var config = require('./config/config');    // place config file, being ignored via gitignore
 
 var dataAccess = require('./model/dataAccess')(config);
 
@@ -35,8 +35,7 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-// error handler
-// no stacktraces leaked to user unless in development environment
+// error handler (no stacktraces leaked to user unless in development environment)
 app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error', {
