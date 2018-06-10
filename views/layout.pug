@@ -1,8 +1,12 @@
 doctype html
 html
-  head
-    title= _title_
-    link(rel='stylesheet', href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
-    link(rel='stylesheet', href='/stylesheets/style.css')
-  body
-    block content
+	head
+		title= _title_
+		script(src='/libs/jquery/dist/jquery.min.js')
+		script(src='/libs/bootstrap/dist/js/bootstrap.min.js')
+		script(src='/libs/toastr/build/toastr.min.js')
+		link(rel='stylesheet', href='/libs/bootstrap/dist/css/bootstrap.min.css')
+		link(rel='stylesheet', href='/libs/toastr/build/toastr.min.css')
+		link(rel='stylesheet', href='/stylesheets/style.css')
+	body
+		block content
