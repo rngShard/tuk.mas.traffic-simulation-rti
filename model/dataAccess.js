@@ -29,104 +29,53 @@ module.exports = function(config) {
 		return this.db;
 	};
 
-	// this.testFind = function() {
-	// 	return new Promise(function(fulfill, reject) {
-	// 		db.collection('test').findOne({},function(err, doc) {
-	// 			if (err)
-	// 				reject(err);
-	// 			else
-	// 				fulfill(doc);
-	// 		});
-	// 	});
-	// };
+	/* Mongo functionality */
 
-	// this.testCount = function() {
-	// 	return new Promise(function(fulfill, reject) {
-	// 		db.collection('test').count(function(err, count) {
-	// 			if (err)
-	// 				reject(err);
-	// 			else
-	// 				fulfill(count);
-	// 		});
-	// 	});
-	// }
-
-	// this.testInsertOne = function(obj) {
-	// 	return new Promise(function(fulfill, reject) {
-	// 		console.log(obj);
-	// 		db.collection('test').insertOne(obj, function(err, doc) {
-	// 			if(err)
-	// 				reject(err);
-	// 			else
-	// 				fulfill(doc);
-	// 		});
-	// 	});
-	// };
-
-
-	this.findAllIn = function(collection) {
+	var findOne = function(coll, q) {
 		return new Promise(function(fulfill, reject) {
-			try {	// nodemon crashes here sometimes (...?)
-				db.collection(collection).find({}).toArray(function(err, doc) {
-					if (err)
-						reject(err);
-					else
-						fulfill(doc);
-				});
-			} catch(err) {
-				console.log(err);
-			}
+			this.db.collection(coll).findOne(q, function(err, doc) { err ? reject(err) : fulfill(doc) });
+		});
+	};
+	var find = function(coll, q) {
+		return new Promise(function(fulfill, reject) {
+			this.db.collection(coll).find(q).toArray(function(err, doc) { err ? reject(err) : fulfill(doc) });
+		});
+	};
+	var insertOne = function(coll, q) {
+		return new Promise(function(fulfill, reject) {
+			this.db.collection(coll).insertOne(q, function(err, doc) { err ? reject(err) : fulfill(doc) });
+		});
+	};
+	var updateOne = function(coll, q, obj) {
+		return new Promise(function(fulfill, reject) {
+			this.db.collection(coll).updateOne(q, obj, function(err, doc) { err ? reject(err) : fulfill(doc) });
+		});
+	};
+	var deleteOne = function(coll, q) {
+		return new Promise(function(fulfill, reject) {
+			this.db.collection(coll).deleteOne(q, function(err, doc) { err ? reject(err) : fulfill(doc) });
+		});
+	};
+	var remove = function(coll, q) {
+		return new Promise(function(fulfill, reject) {
+			this.db.collection(coll).remove(q, {justOne: false}, function(err, doc) { err ? reject(err) : fulfill(doc) });
 		});
 	};
 
-	// this.findAllWhere = function(collection, query) {
-	// 	return new Promise(function(fulfill, reject) {
-	// 		db.collection(collection).find(query).toArray(function(err, doc) {
-	// 			if (err)
-	// 				reject(err);
-	// 			else
-	// 				fulfill(doc);
-	// 		});
-	// 	});
-	// };
+	/* dataAccess functionality */
 
-	this.findDocIn = function(collection, docId) {
-		var o_id = new mongo.ObjectID(docId);
-		return new Promise(function(fulfill, reject) {
-			db.collection(collection).findOne({_id: o_id}, function(err, doc) {
-				if (err)
-					reject(err);
-				else
-					fulfill(doc);
-			});
-		});
-	}
-	
-	this.insertDocInto = function(collection, obj) {
-		return new Promise(function(fulfill, reject) {
-			db.collection(collection).insertOne(obj, function(err, doc) {
-				if(err)
-					reject(err);
-				else
-					fulfill(doc);
-			});
-		});
-	};
+	this.findDocIn = function(coll, docId) { return findOne(coll, {_id: new mongo.ObjectID(docId)}); };
+	this.findDocWhere = function(coll, qObj) { return findOne(coll, qObj); };
+	this.findAllIn = function(coll, docId) { return find(coll, {}); };
+	this.findAllWhere = function(coll, qObj) { return find(coll, qObj); };
 
-	this.replaceDocIn = function(collection, docId, obj) {
-		var o_id = new mongo.ObjectID(docId);
-		return new Promise(function(fulfill, reject) {
-			db.collection(collection).update({_id: o_id}, obj, function(err, doc) {
-				if (err)
-					reject(err);
-				else
-					fulfill(doc);
-			});
-		});
-	}
+	this.insertDocInto = function(coll, obj) { return insertOne(coll, obj); };
 
+	this.replaceDocIn = function(coll, docId, obj) { return updateOne(coll, {_id: new mongo.ObjectID(docId)}, obj); };
+
+	this.removeDocIn = function(coll, docId) { return deleteOne(coll, {_id: new mongo.ObjectID(docId)}); };
+	this.removeAllWhere = function(coll, q) { return remove(coll, q); };
 
 	return this;
-	
 };
 
