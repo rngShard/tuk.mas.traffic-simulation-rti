@@ -25,8 +25,8 @@ var config = require('./config/config');    // place config file, being ignored 
 
 var dataAccess = require('./model/dataAccess')(config);
 
-app.use('/', require('./routes/index'));
-app.use('/api/', require('./controller/admin')(dataAccess));
+app.use('/', require('./routes/index')());
+app.use('/api/', require('./controller/api')(dataAccess));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
