@@ -2,11 +2,27 @@ var express = require('express');
 var router = express.Router();
 var debug = require('debug')('App');
 
-module.exports = function(dataAccess) {
+module.exports = function(masSimulatorConnection) {
 
 	router.get('/', function(req, res, next) {
 		return res.send({
 			msg: 'Welcome to the API!'
+		});
+	});
+
+	router.get('/graph', function(req, res, next) {
+		let graph = masSimulatorConnection.getGraph();
+		return res.send({
+			msg: 'Graph retrieved from internal connection to MAS-Simulator.',
+			payload: graph
+		});
+	});
+
+	router.get('/graph/test', function(req, res, next) {
+		let graph = masSimulatorConnection.getTestGraph();
+		return res.send({
+			msg: 'Test Graph retrieved.',
+			payload: graph
 		});
 	});
 
