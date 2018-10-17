@@ -3,7 +3,17 @@ extends layout
 block content
 	.container
 		h1 WIP: Simulated Traffic Network Visualization
-		#chart
+		.row
+			.col-md-10
+				#chart
+			.col-md-2
+				.form-group
+				label(for='activeGraph') Active Graph
+				select.form-control#activeGraph(onchange='updateGraph();')
+					for title, i in graphTitles
+						option(value=i)= title
+		.row
+			| .. timeline ..
 
 	script(src='libs/d3/dist/d3.min.js')
 	script(src='js/graph.js')

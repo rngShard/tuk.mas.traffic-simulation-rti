@@ -31,7 +31,7 @@ var masSimulatorConnection = require('./model/masSimulatorConnection')();
 
 /* View */
 
-app.use('/', require('./routes/index')());
+app.use('/', require('./routes/index')(masSimulatorConnection));
 
 /* Controller */
 

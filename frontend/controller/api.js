@@ -10,43 +10,30 @@ module.exports = function(masSimulatorConnection) {
 		});
 	});
 
-	router.get('/graph', function(req, res, next) {
+	router.get('/graph', function(req, res) {
 		let graph = masSimulatorConnection.getGraph();
 		return res.send({
 			msg: 'Graph retrieved from internal connection to MAS-Simulator.',
 			payload: graph
 		});
 	});
-
-	router.get('/graph/test', function(req, res, next) {
-		let graph = masSimulatorConnection.getTestGraph();
+	router.get('/graph/allTitles', function(req, res) {
 		return res.send({
-			msg: 'Test Graph retrieved.',
-			payload: graph
+			msg: 'Titles of all graphs in masSImulatorConnection.',
+			payload: masSimulatorConnection.getAllGraphTitles()
 		});
 	});
-
-	// router.get('/test', function(req, res, next) {
-	// 	dataAccess.findAllIn('test').done(function(docs) {
-	// 		dataAccess.findDocIn('test','5b1cf51fbe8f3447eeb1f25e').done(function(doc) {
-	// 			dataAccess.insertDocInto('test',{}).done(function(insertStat) {
-	// 				dataAccess.replaceDocIn('test','5b1cf51fbe8f3447eeb1f25e',{test:'21'}).done(function(replaceStat) {
-	// 					dataAccess.removeDocIn('test','5b1d6efb2570f82af3c81d22').done(function(removeStat) {
-	// 						dataAccess.removeAllWhere('test',{test2: '234'}).done(function(removeStat) {
-	// 							return res.send({
-	// 								docs: docs,
-	// 								doc: doc,
-	// 								insert: insertStat,
-	// 								replace: replaceStat,
-	// 								remove: removeStat
-	// 							});
-	// 						});
-	// 					});
-	// 				});
-	// 			});
-	// 		});
-	// 	});
-	// });
+	router.put('/graph/setActive/:idx', function(req, res) {
+		let idx = parseInt(req.params.idx);
+		if (isNaN(idx)) {
+			return res.send({msg:'Invalid active id, must be an integer'});
+		} else if (idx < 0 || idx >= masSimulatorConnection.graphs.length) {
+			return res.send({msg:'Invalid integer value, must be in range of lenght of graphs-array.'});
+		} else {
+			masSimulatorConnection.setActiveGraph(req.params.idx);
+			return res.send({msg:'New activeGraph set.', newActive:idx});
+		}
+	});
 
 	return router;
 }

@@ -1,3 +1,7 @@
+#chart {
+    border: 1px solid black;
+}
+
 svg line {
     stroke: #4A4A4A;
     stroke-width: 2;

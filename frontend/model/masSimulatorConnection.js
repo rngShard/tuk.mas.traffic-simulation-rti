@@ -1,12 +1,10 @@
 module.exports = function() {
-
-    var masSimulatorEndpoint = undefined;
-
-    this.getTestGraph = function() {
-        return {
+    this.activeGraph = 0;
+    this.graphs = [
+        {
             'directed': true,
             'graph': {
-                'name': 'Test directed Graph'
+                'name': 'testGraph'
             },
             'links': [
                 {'source': 0, 'target': 1, 'value':1},
@@ -29,12 +27,8 @@ module.exports = function() {
                 {'id': 5},
                 {'id': 6}
             ]
-        }
-    };
-    this.getGraph = function() {
-        // TODO: proper requesting of masSimulator for graph etc.
-
-        return {
+        },
+        {
             'directed': false,
             'graph': {
                 'name': "Zachary's Karate Club"
@@ -156,6 +150,23 @@ module.exports = function() {
                 {'club': 'Officer', 'color': 'orange', 'id': 32, 'size': 12},
                 {'club': 'Officer', 'color': 'orange', 'id': 33, 'size': 17}
             ]
+        }
+    ];
+
+    this.getGraph = function() {
+        return this.graphs[this.activeGraph];
+    };
+
+    this.setActiveGraph = function(newActive) {     // Set activeGraph to new int-index of graphs-array
+        this.activeGraph = newActive;
+    };
+
+    this.getAllGraphTitles = function() {
+        let titles = [];
+        for (i = 0; i < graphs.length; i++) {
+            titles.push(graphs[i]['graph']['name']);
+            if (i === graphs.length - 1)
+                return titles;
         }
     }
 
