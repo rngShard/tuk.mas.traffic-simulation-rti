@@ -1,3 +1,5 @@
+let MAX_TICKS = 63;
+
 let w = $('#chart').width(),
     h = w/2;
     // fill = d3.schemeCategory10;
@@ -6,15 +8,16 @@ let vis = d3.select("#chart")
   .append("svg:svg")
     .attr("width", w)
     .attr("height", h)
-// let loading = vis.append("text")
-//     .attr("dx", w/2+"px")
-//     .attr("dy", h/2+"px")
-//     .attr("text-anchor", "middle")
-//     .attr("font-family", "sans-serif")
-//     .attr("font-size", 21)
-//     .text("Simulating. One moment please…");
+let loading = vis.append("text")
+    .attr("dx", w/2+"px")
+    .attr("dy", h/2+"px")
+    .attr("text-anchor", "middle")
+    .attr("font-family", "sans-serif")
+    .attr("font-size", 32)
+    .attr("font-weight", "bold")
+    .text("Simulating network. One moment please…");
 
-$.get('http://localhost:3000/api/graph/test', function(res) {
+$.get('http://localhost:3000/api/graph', function(res) {
     graph = res.payload;
 
     let links = vis.selectAll("line.link")
@@ -36,17 +39,23 @@ $.get('http://localhost:3000/api/graph/test', function(res) {
         .force("charge", d3.forceManyBody().strength(-100))
         .force("link", d3.forceLink(graph.links)
                          .distance(function(d) {return d.value;})
-                         .strength(0.1))
+                         .strength(.1))
         .force("center", d3.forceCenter(w/2,h/2))
         // .force("x", d3.forceX())
         // .force("y", d3.forceY())
     
+    let counter = 0;
     sim.on("tick", function() {
         links.attr("x1", function(d) { return d.source.x; })
             .attr("y1", function(d) { return d.source.y; })
             .attr("x2", function(d) { return d.target.x; })
             .attr("y2", function(d) { return d.target.y; });
 
-        nodes.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+        if (counter > MAX_TICKS) {
+            loading.remove();
+            nodes.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+            sim.stop()
+        }
+        counter++;
     });
 });
