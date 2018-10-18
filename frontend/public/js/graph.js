@@ -1,5 +1,73 @@
 let MAX_TICKS = 63;
 
+ 
+class Animation {
+    constructor() {}
+
+    /* take agentIds as param to assign colors for agents. */
+    setCarAgents(carAgents) {
+        this.carAgents = {};
+        for (let [id, attrs] of Object.entries(carAgents)) {
+            this.carAgents[id] = {
+                type: attrs.type,
+                color: d3.interpolateBlues((Math.random()+1)/2)
+            }
+        }
+        console.log(this.carAgents);
+    }
+
+    spawnAgent(nodeId, agentType) {
+        // todo
+    }
+}
+
+   /* Uses dict-type of lists ({"000":"LOCAL", "001":"GLOBAL"}) */
+class Simulation {
+    constructor(logs) {
+        this.animation = new Animation();
+        for (let i = 0; i < logs.length; i++) {
+            if (logs[i]['type'] === "carAgents.log") {
+                this.carAgentsEvents = logs[i]['lines'];
+                this.animation.setCarAgents(this._extractCarAgents(logs[i]['lines']));
+            } else if (logs[i]['type'] === "plannerAgent.log") {
+                // this.plannerAgentEvents = logs[i]['lines'];
+            } else {
+                toastr.warning("Encountered unhandled log-type...");
+            }
+        }
+    }
+
+    _extractCarAgents(logLines) {
+        let carAgents = {};
+        for (let i = 0; i < logLines.length; i++) {
+            let logLine = logLines[i];
+            let s = logLine.split(';');
+            if (s[1].trim() === "SPAWN") {
+                let agentId = s[2].trim(),
+                    agentType = s[4].trim();
+                carAgents[agentId] = {
+                    type: agentType
+                };
+            }
+            if (i >= logLines.length-1) { return carAgents; }
+        }
+    }
+
+    /* Start Simulation run with animations
+     * 
+     * Please note that is is ESSENTIAL that log entries are ordered by ts!
+     * 
+     * FOR NOW only traverse carAgents.log. TODO: traverse planner and query most current event and so on 
+     */
+    start() {
+        // todo: set init time
+        for (let i = 0; i < this.carAgentsEvents; i++) {
+            let currentEvent = this.carAgentsEvents[i];
+            // todo: set for each entry in log respective timeout and call animation after set timeout
+        }
+    }
+}
+
 
 let drawGraph = function() {
     document.getElementById('chart').innerHTML = '';
@@ -129,12 +197,14 @@ let toggleEnabledRunOpts = function(activeGraph) {
     });
 };
 
+var retrievedLogs = [];
 let loadLogs = function() {
     $('#carAgentsDOTlog').val('');
     $('#plannerAgentDOTlog').val('');
+    retrievedLogs = [];
 
     let selectedSim = $('#simulationRun').val();    // selectedSimi <==> logId
-    if (selectedSim !== "None") {
+    if (selectedSim !== "None") {   
         $.get('http://localhost:3000/api/logs/'+selectedSim, function(res) {
             let logs = res.payload;
 
@@ -143,11 +213,11 @@ let loadLogs = function() {
                 $(`#${log['type'].replace('.','DOT')}`).val(log['lines'].join('\n'));
             });
 
+            retrievedLogs = logs;
             toastr.info(`Logs loaded for simulation <${selectedSim}>`);
         });
     }
 };
-
 let runSimulation = function() {
     let selectedSim = $('#simulationRun').val();
     if (selectedSim === "None") {
@@ -157,7 +227,9 @@ let runSimulation = function() {
         $('#btnRun').prop('disabled', true);
         $('#btnStop').prop('disabled', false);
 
-        // TODO: run simulation, visu in d3 / jQuery
+        let sim = new Simulation(retrievedLogs);
+        // console.log(sim.carAgentsEvents, sim.plannerAgentEvents);
+
 
         toastr.success(`Starting Simulation <${selectedSim}>`);
     }
