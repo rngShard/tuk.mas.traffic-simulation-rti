@@ -3,6 +3,7 @@ let MAX_TICKS = 63;
 
 let drawGraph = function() {
     document.getElementById('chart').innerHTML = '';
+    $('#btnRun').prop('disabled', true);
 
     let w = $('#chart').width(),
         h = w/2;
@@ -79,6 +80,7 @@ let drawGraph = function() {
                 nodes.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
                 sim.stop()
                 $('[data-toggle="tooltip"]').tooltip();
+                $('#btnRun').prop('disabled', false);
             }
             counter++;
         });
@@ -116,6 +118,7 @@ let updateGraph = function() {
             drawGraph();
             $('#simulationRun').val("None");
             toggleEnabledRunOpts(newActive);
+            loadLogs();
         }
     });
 };
@@ -126,15 +129,45 @@ let toggleEnabledRunOpts = function(activeGraph) {
     });
 };
 
+let loadLogs = function() {
+    $('#carAgentsDOTlog').val('');
+    $('#plannerAgentDOTlog').val('');
+
+    let selectedSim = $('#simulationRun').val();    // selectedSimi <==> logId
+    if (selectedSim !== "None") {
+        $.get('http://localhost:3000/api/logs/'+selectedSim, function(res) {
+            let logs = res.payload;
+
+            if (logs.length === 0) { console.log('ERROR: loadLogs did not retrieve actual logs !!'); }  // shouldn't happen
+            logs.forEach(function(log) {
+                $(`#${log['type'].replace('.','DOT')}`).val(log['lines'].join('\n'));
+            });
+
+            toastr.info(`Logs loaded for simulation <${selectedSim}>`);
+        });
+    }
+};
+
 let runSimulation = function() {
     let selectedSim = $('#simulationRun').val();
     if (selectedSim === "None") {
         toastr.warning("Please select a Simulatin-run to start.");
     } else {
+        $('select').prop('disabled', true);
+        $('#btnRun').prop('disabled', true);
+        $('#btnStop').prop('disabled', false);
+
         // TODO: run simulation, visu in d3 / jQuery
 
         toastr.success(`Starting Simulation <${selectedSim}>`);
     }
+};
+let stopSimulation = function() {
+    $('select').prop('disabled', false);
+    $('#btnRun').prop('disabled', false);
+    $('#btnStop').prop('disabled', true);
+
+    // TODO
 };
 
 $(document).ready(function() {

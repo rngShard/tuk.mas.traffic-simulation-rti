@@ -13,12 +13,24 @@ block content
 						for title, i in graphTitles
 							option(value=i)= title
 					label(for='simulationRun') Simulation Run
-					select.form-control#simulationRun
+					select.form-control#simulationRun(onchange='loadLogs();')
 						option None
 						for logInfo in logInfos
 							option(data-graph=logInfo.graphIdx)= logInfo.id
 					.sim-controls(style='text-align:center; margin-top:1em;')
-						button.btn.btn-success(onclick='runSimulation();') Run
+						button.btn.btn-success#btnRun(onclick='runSimulation();' disabled) Run
+						button.btn.btn-danger#btnStop(onclick='stopSimulation();' disabled) Stop
+		.row
+			.col-md-6
+				.form-group
+					label(for='carAgentsDOTlog') 
+						i carAgents.log
+					textarea#carAgentsDOTlog(style='width:100%; height:6em;' disabled)
+			.col-md-6
+				.form-group
+					label(for='plannerAgentDOTlog') 
+						i plannerAgent.log
+					textarea#plannerAgentDOTlog(style='width:100%; height:6em;' disabled)
 
 	script(src='libs/d3/dist/d3.min.js')
 	script(src='js/graph.js')

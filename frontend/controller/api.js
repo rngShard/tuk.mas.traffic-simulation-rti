@@ -57,6 +57,12 @@ module.exports = function(masSimulatorConnection) {
 			payload: masSimulatorConnection.getLogInfos()
 		});
 	});
+	router.get('/logs/:id', function(req, res) {
+		return res.send({
+			msg: `Getting associatd logs for sim-run <${req.params.id}`,
+			payload: masSimulatorConnection.getSimulationLogs(req.params.id)
+		});
+	});
 
 	return router;
 }

@@ -181,6 +181,7 @@ module.exports = function() {
                 accumLogs.push({
                     id: s[0],
                     graphIdx: s[1],
+                    type: s[2],
                     lines: lines
                 });
             });
@@ -202,6 +203,16 @@ module.exports = function() {
             }
         }
     }
+    this.getSimulationLogs = function(logId) {   // get logs of specified single simulation-run
+        let assocLogs = [];
+        for (i = 0; i < accumLogs.length; i++) {
+            let log = accumLogs[i];
+            if (log['id'] === logId) { assocLogs.push(log); }
+            if (i >= accumLogs.length-1) {
+                return assocLogs;
+            }
+        }
+    };
 
 
     this.getGraph = function() {
