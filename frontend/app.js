@@ -23,12 +23,22 @@ app.use('/libs', express.static(path.join(__dirname, 'node_modules')));
 
 var config = require('./config/config');    // place config file, being ignored via gitignore
 
+/* Model */
+
 // var dataAccess = require('./model/mongoConnection')(config);   // No DB access needed
 var simulationStore = undefined    // TODO: (controller) simulationStore (that stores time steps)
+var masSimulatorConnection = require('./model/masSimulatorConnection')();
 
-app.use('/', require('./routes/index')());
+/* View */
+
+app.use('/', require('./routes/index')(masSimulatorConnection));
+
+/* Controller */
+
 // app.use('/store/', require('./controller/store'));   // TODO: simStore
-// app.use('/api/', require('./controller/api')(dataAccess));
+app.use('/api/', require('./controller/api')(masSimulatorConnection));
+
+/* misc */
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
