@@ -7,7 +7,8 @@ module.exports = function(masSimulatorConnection) {
     router.get('/', function(req, res) {
         res.render('index', {
             _title_: 'RTI Traffic Simulation Visualization',
-            graphTitles: masSimulatorConnection.getAllGraphTitles()
+            graphTitles: masSimulatorConnection.getAllGraphTitles(),
+            logInfos: masSimulatorConnection.getLogInfos()
         });
     });
 

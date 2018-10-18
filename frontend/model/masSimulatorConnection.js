@@ -1,6 +1,13 @@
+const path = require('path');
+const readline = require('readline');
+const fs = require('fs');
+
+const LOG_DIR_PATH = path.resolve('../sim_logs/');
+const NUM_ASSOC_LOGS = 2;
+
 module.exports = function() {
     this.activeGraph = 0;
-    this.graphs = [
+    this.graphs = [     // TODO: read graphs from json-file
         {
             'directed': true,
             'graph': {
@@ -152,6 +159,50 @@ module.exports = function() {
             ]
         }
     ];
+
+    let accumLogs = [];
+    let readLogLines = function(logFileName, array) {
+        let rl = readline.createInterface({
+            input: fs.createReadStream(LOG_DIR_PATH+'/'+logFileName),
+            crlfDelay: Infinity
+        });
+        rl.on('line', (line) => { array.push(line); });
+    };
+    fs.readdir(LOG_DIR_PATH, (err, files) => {
+        files.forEach(logFileName => {
+            let lines = [],
+                rl = readline.createInterface({
+                input: fs.createReadStream(LOG_DIR_PATH+'/'+logFileName),
+                crlfDelay: Infinity
+            });
+            rl.on('line', (line) => { lines.push(line); });
+            rl.on('close', function() {
+                let s = logFileName.split('-');
+                accumLogs.push({
+                    id: s[0],
+                    graphIdx: s[1],
+                    lines: lines
+                });
+            });
+        });
+    })
+    this.getLogs = function() {
+        return accumLogs;
+    }
+    this.getLogInfos = function() {
+        let infos = [];
+        for (i = 0; i < accumLogs.length; i++) {
+            infos.push({
+                id: accumLogs[i]['id'],
+                graphIdx: accumLogs[i]['graphIdx']
+            });
+            for (j=0; j<NUM_ASSOC_LOGS-1; j++) { i++ }  // not very nice ... `i+=NUM_ASSOC_LOGS` instead of `i++` in for loop wouldn't work though
+            if (i >= accumLogs.length - 1) {
+                return infos;
+            }
+        }
+    }
+
 
     this.getGraph = function() {
         return this.graphs[this.activeGraph];

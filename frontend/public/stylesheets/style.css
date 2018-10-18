@@ -2,3 +2,7 @@ body {
 	padding: 50px;
 	font: 14px "Helvetica Neue","Open Sans",sans-serif;
 }
+
+label {
+	margin-top: 1em;
+}

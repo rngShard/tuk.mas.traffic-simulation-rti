@@ -8,12 +8,17 @@ block content
 				#chart
 			.col-md-2
 				.form-group
-				label(for='activeGraph') Active Graph
-				select.form-control#activeGraph(onchange='updateGraph();')
-					for title, i in graphTitles
-						option(value=i)= title
-		.row
-			| .. timeline ..
+					label(for='activeGraph') Active Graph
+					select.form-control#activeGraph(onchange='updateGraph();')
+						for title, i in graphTitles
+							option(value=i)= title
+					label(for='simulationRun') Simulation Run
+					select.form-control#simulationRun
+						option None
+						for logInfo in logInfos
+							option(data-graph=logInfo.graphIdx)= logInfo.id
+					.sim-controls(style='text-align:center; margin-top:1em;')
+						button.btn.btn-success(onclick='runSimulation();') Run
 
 	script(src='libs/d3/dist/d3.min.js')
 	script(src='js/graph.js')

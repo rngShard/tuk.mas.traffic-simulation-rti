@@ -23,6 +23,16 @@ module.exports = function(masSimulatorConnection) {
 			payload: masSimulatorConnection.getAllGraphTitles()
 		});
 	});
+	router.get('/graph/whichActive', function(req, res) {
+		let activeIdx = parseInt(masSimulatorConnection.activeGraph);
+		return res.send({
+			msg: 'Retrieving which graph set to active.',
+			payload: {
+				idx: activeIdx,
+				name: masSimulatorConnection.graphs[activeIdx]['graph']['name']
+			}
+		});
+	});
 	router.put('/graph/setActive/:idx', function(req, res) {
 		let idx = parseInt(req.params.idx);
 		if (isNaN(idx)) {
@@ -33,6 +43,19 @@ module.exports = function(masSimulatorConnection) {
 			masSimulatorConnection.setActiveGraph(req.params.idx);
 			return res.send({msg:'New activeGraph set.', newActive:idx});
 		}
+	});
+
+	router.get('/logs', function(req, res) {
+		return res.send({
+			msg: 'Retrieving accumulated logs from simulatorConnection',
+			payload: masSimulatorConnection.getLogs()
+		});
+	});
+	router.get('/logs/info', function(req, res) {
+		return res.send({
+			msg: 'Retrieving accumulated logs infos from simulatorConnection',
+			payload: masSimulatorConnection.getLogInfos()
+		});
 	});
 
 	return router;

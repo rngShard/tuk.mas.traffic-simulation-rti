@@ -19,7 +19,7 @@ let drawGraph = function() {
         .attr("font-family", "sans-serif")
         .attr("font-size", 32)
         .attr("font-weight", "bold")
-        .text("Simulating network. One moment please…");
+        .text("Expanding network. One moment please…");
     
     $.get('http://localhost:3000/api/graph', function(res) {
         let graph = res.payload;
@@ -112,12 +112,32 @@ let updateGraph = function() {
         url: '/api/graph/setActive/'+newActive,
         type: 'PUT',
         success: function(res) {
-            toastr.success(res.msg);
+            toastr.info(res.msg);
             drawGraph();
+            $('#simulationRun').val("None");
+            toggleEnabledRunOpts(newActive);
         }
     });
-}
+};
+let toggleEnabledRunOpts = function(activeGraph) {
+    $('#simulationRun').children().prop('disabled', function() {
+        let allowedGraphIdx = parseInt($(this).attr('data-graph'));
+        return !isNaN(allowedGraphIdx) && allowedGraphIdx !== parseInt(activeGraph);
+    });
+};
+
+let runSimulation = function() {
+    let selectedSim = $('#simulationRun').val();
+    if (selectedSim === "None") {
+        toastr.warning("Please select a Simulatin-run to start.");
+    } else {
+        // TODO: run simulation, visu in d3 / jQuery
+
+        toastr.success(`Starting Simulation <${selectedSim}>`);
+    }
+};
 
 $(document).ready(function() {
     drawGraph();
+    toggleEnabledRunOpts(0);
 });
