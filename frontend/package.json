@@ -18,7 +18,7 @@
     "mongodb": "^2.2.33",
     "morgan": "^1.7.0",
     "pg": "^6.1.0",
-    "popper.js": "^1.14.4",
+    "popper.js": "latest",
     "promise": "^8.0.1",
     "pug": "^2.0.0-rc.4",
     "serve-favicon": "^2.5.0",

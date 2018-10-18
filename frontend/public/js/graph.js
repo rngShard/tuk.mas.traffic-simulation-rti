@@ -1,16 +1,18 @@
+let MAX_TICKS = 63;
+
+
 let drawGraph = function() {
     document.getElementById('chart').innerHTML = '';
-    let MAX_TICKS = 63;
 
     let w = $('#chart').width(),
         h = w/2;
         // fill = d3.schemeCategory10;
     
-    let vis = d3.select("#chart")
+    let svg = d3.select("#chart")
       .append("svg:svg")
         .attr("width", $('#chart').width())
         .attr("height", $('#chart').width()/2)
-    let loading = vis.append("text")
+    let loading = svg.append("text")
         .attr("dx", w/2+"px")
         .attr("dy", h/2+"px")
         .attr("text-anchor", "middle")
@@ -20,9 +22,9 @@ let drawGraph = function() {
         .text("Simulating network. One moment please…");
     
     $.get('http://localhost:3000/api/graph', function(res) {
-        graph = res.payload;
+        let graph = res.payload;
     
-        let links = vis.selectAll("line.link")
+        let links = svg.selectAll("line.link")
             .data(graph.links)
           .enter().append("svg:line")
             .attr("class", "link")
@@ -30,12 +32,31 @@ let drawGraph = function() {
             .attr("y1", function(d) { return d.source.y; })
             .attr("x2", function(d) { return d.target.x; })
             .attr("y2", function(d) { return d.target.y; });
-        let nodes = vis.selectAll("g.node")
+        let radius = 5,
+            nodes = svg.selectAll("g.node")
             .data(graph.nodes)
           .enter().append("svg:g")
-            .attr("class", "node");
-        nodes.append("svg:circle")
-            .attr("r", 5);
+            .attr("class", "node")
+            .on('mouseover', function(d,i) {
+                $("#circle"+i).attr({      // jQuery, as d3 wouldn't work properly
+                    fill: "grey",
+                    r: radius * 1.5
+                });
+            }
+            )
+            .on('mouseout', function(d, i) {
+                $("#circle"+i).attr({
+                    fill: "black",
+                    r: radius
+                });
+            })
+          .append("svg:circle")
+            .attr('id', function(d) { return 'circle'+d.id; })
+            .attr("r", radius)
+            .attr('title', function(d) { return d.id; })
+            .attr('data-toggle', 'tooltip');
+            
+        
     
         let sim = d3.forceSimulation(graph.nodes)
             .force("charge", d3.forceManyBody().strength(-100))
@@ -57,10 +78,29 @@ let drawGraph = function() {
                 loading.remove();
                 nodes.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
                 sim.stop()
+                $('[data-toggle="tooltip"]').tooltip();
             }
             counter++;
         });
     });
+}
+
+let toggleNodeIdTexts = function() {
+    // let texts = svg.selectAll("g.node")
+    //     .data(graph.nodes)
+    //   .enter()
+    //     .append('text')
+    //     .attr('dx', 42)
+    //     .attr('dy', 42)
+    //     .text(function(d) { return d.id; });
+
+    let texts = svg.selectAll("g.node")
+        .data(graph.nodes)
+      .enter()
+        .append('text')
+        .attr('dx', 42)
+        .attr('dy', 42)
+        .text(function(d) { return d.id; });
 }
 
 
