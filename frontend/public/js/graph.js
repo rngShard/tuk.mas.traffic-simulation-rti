@@ -1,4 +1,5 @@
-let MAX_TICKS = 63;
+let MAX_TICKS = 63,
+    SVG = undefined;
 
  
 class Animation {
@@ -13,15 +14,79 @@ class Animation {
                 color: d3.interpolateBlues((Math.random()+1)/2)
             }
         }
-        console.log(this.carAgents);
     }
 
-    spawnAgent(nodeId, agentType) {
-        // todo
+    animateCarAgent(carAgentEvent) {
+        switch (carAgentEvent.type) {
+            case "SPAWN":
+                this._drawStaticCarAgent(carAgentEvent.startNodeId, carAgentEvent.agentId);
+                break;
+            case "ENTER":
+                // TODO (nxt)
+                console.log(`Animating ENTER`);
+                break;
+            case "REACH":
+                this._drawStaticCarAgent(carAgentEvent.endNodeId, carAgentEvent.agentId);
+                break;
+            case "DESPAWN":
+                this._purgeCarAgent(carAgentEvent.agentId);
+                break;
+            default:
+                console.warning("Trying to animate unexpected carAgent type !!");
+                break;
+        }
+    }
+
+    _drawStaticCarAgent(nodeId, carAgentId) {
+        this._purgeCarAgent(carAgentId);
+        let nodeCircle = d3.select('#circle'+nodeId),
+            transformString = nodeCircle.attr('transform'),
+            s = transformString.substring(10, transformString.length - 1).split(','),
+            x = s[0],
+            y = s[1];
+        let circle = SVG.append("circle")
+            .attr('id', "agent"+carAgentId)
+            .attr('cx', x)
+            .attr('cy', y)
+            .attr('fill', this.carAgents[carAgentId].color)
+            .attr('r', 10);
+    }
+
+    _purgeCarAgent(carAgentId) {
+        d3.select('#agent'+carAgentId).remove();
     }
 }
 
-   /* Uses dict-type of lists ({"000":"LOCAL", "001":"GLOBAL"}) */
+class carAgentEvent {
+    constructor(line) {
+        let s = line.split(';');
+
+        this.ts = new Date(s[0].trim()).getTime();
+        this.type = s[1].trim().toUpperCase();
+        this.agentId = s[2].trim();
+        switch (this.type) {
+            case "SPAWN":
+                this.startNodeId = s[3].trim();
+                this.agentType = s[4].trim();
+                break;
+            case "ENTER":
+                this.startNodeId = s[3].trim();
+                this.endNodeId = s[4].trim();
+                this.travelTime = s[5].trim();
+                break;
+            case "REACH":
+                this.endNodeId = s[3].trim();
+                break;
+            case "DESPAWN":
+                break;
+            default:
+            console.warning("Trying to create unexpected carAgent type !!");
+                break;
+        }
+    }
+}
+
+/* Uses dict-type of lists ({"000":"LOCAL", "001":"GLOBAL"}) */
 class Simulation {
     constructor(logs) {
         this.animation = new Animation();
@@ -31,6 +96,7 @@ class Simulation {
                 this.animation.setCarAgents(this._extractCarAgents(logs[i]['lines']));
             } else if (logs[i]['type'] === "plannerAgent.log") {
                 // this.plannerAgentEvents = logs[i]['lines'];
+                // TODO: animate events
             } else {
                 toastr.warning("Encountered unhandled log-type...");
             }
@@ -55,15 +121,20 @@ class Simulation {
 
     /* Start Simulation run with animations
      * 
-     * Please note that is is ESSENTIAL that log entries are ordered by ts!
-     * 
-     * FOR NOW only traverse carAgents.log. TODO: traverse planner and query most current event and so on 
+     * Animations are assynchronously queued by timeouts according to time differences to init time.
+     * - FOR NOW only traverse carAgents.log. TODO: traverse planner and query most current event and so on 
      */
     start() {
-        // todo: set init time
-        for (let i = 0; i < this.carAgentsEvents; i++) {
-            let currentEvent = this.carAgentsEvents[i];
-            // todo: set for each entry in log respective timeout and call animation after set timeout
+        let initTsString = this.carAgentsEvents[0].split(';')[0].trim();
+        let initTimeMs = new Date(initTsString).getTime();
+        
+        for (let i = 0; i < this.carAgentsEvents.length; i++) {
+            let line = this.carAgentsEvents[i],
+                cae = new carAgentEvent(line),
+                thiz = this;
+            setTimeout(function() {
+                thiz.animation.animateCarAgent(cae);
+            }, cae.ts - initTimeMs);
         }
     }
 }
@@ -80,7 +151,8 @@ let drawGraph = function() {
     let svg = d3.select("#chart")
       .append("svg:svg")
         .attr("width", $('#chart').width())
-        .attr("height", $('#chart').width()/2)
+        .attr("height", $('#chart').width()/2);
+    SVG = svg;
     let loading = svg.append("text")
         .attr("dx", w/2+"px")
         .attr("dy", h/2+"px")
@@ -156,14 +228,6 @@ let drawGraph = function() {
 }
 
 let toggleNodeIdTexts = function() {
-    // let texts = svg.selectAll("g.node")
-    //     .data(graph.nodes)
-    //   .enter()
-    //     .append('text')
-    //     .attr('dx', 42)
-    //     .attr('dy', 42)
-    //     .text(function(d) { return d.id; });
-
     let texts = svg.selectAll("g.node")
         .data(graph.nodes)
       .enter()
@@ -227,9 +291,8 @@ let runSimulation = function() {
         $('#btnRun').prop('disabled', true);
         $('#btnStop').prop('disabled', false);
 
-        let sim = new Simulation(retrievedLogs);
-        // console.log(sim.carAgentsEvents, sim.plannerAgentEvents);
-
+        let simulation = new Simulation(retrievedLogs);
+        simulation.start();
 
         toastr.success(`Starting Simulation <${selectedSim}>`);
     }
@@ -239,7 +302,9 @@ let stopSimulation = function() {
     $('#btnRun').prop('disabled', false);
     $('#btnStop').prop('disabled', true);
 
-    // TODO
+    // TODO: enable stopping of sim (and animate purges)
+
+    toastr.error(`Simulation <${$('#simulationRun').val()}> stopped.`);
 };
 
 $(document).ready(function() {
