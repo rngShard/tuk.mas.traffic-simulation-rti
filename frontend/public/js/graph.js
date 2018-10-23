@@ -1,6 +1,6 @@
 let MAX_TICKS = 63,
     SVG = undefined;
-
+var simulation = undefined;
  
 class Animation {
     constructor() {}
@@ -10,7 +10,7 @@ class Animation {
         this.carAgents = {};
         for (let [id, attrs] of Object.entries(carAgents)) {
             this.carAgents[id] = {
-                type: attrs.type,
+                stroke: attrs.type === "LOCAL" ? 'red' : attrs.type === "GLOBAL" ? 'green' : 'blue',
                 color: d3.interpolateBlues((Math.random()+1)/2)
             }
         }
@@ -19,14 +19,13 @@ class Animation {
     animateCarAgent(carAgentEvent) {
         switch (carAgentEvent.type) {
             case "SPAWN":
-                this._drawStaticCarAgent(carAgentEvent.startNodeId, carAgentEvent.agentId);
+                this._drawStaticCarAgent(carAgentEvent.agentId, carAgentEvent.startNodeId);
                 break;
             case "ENTER":
-                // TODO (nxt)
-                console.log(`Animating ENTER`);
+                this._drawDynamicCarAgent(carAgentEvent.agentId, carAgentEvent.startNodeId, carAgentEvent.endNodeId, carAgentEvent.travelTime);
                 break;
             case "REACH":
-                this._drawStaticCarAgent(carAgentEvent.endNodeId, carAgentEvent.agentId);
+                this._drawStaticCarAgent(carAgentEvent.agentId, carAgentEvent.endNodeId);
                 break;
             case "DESPAWN":
                 this._purgeCarAgent(carAgentEvent.agentId);
@@ -37,7 +36,14 @@ class Animation {
         }
     }
 
-    _drawStaticCarAgent(nodeId, carAgentId) {
+    purgeAllAnimation() {
+        let thiz = this;
+        Object.keys(this.carAgents).forEach(function(agentId) {
+            thiz._purgeCarAgent(agentId);
+        });
+    }
+
+    _drawStaticCarAgent(carAgentId, nodeId) {
         this._purgeCarAgent(carAgentId);
         let nodeCircle = d3.select('#circle'+nodeId),
             transformString = nodeCircle.attr('transform'),
@@ -49,9 +55,39 @@ class Animation {
             .attr('cx', x)
             .attr('cy', y)
             .attr('fill', this.carAgents[carAgentId].color)
+            .attr('stroke', this.carAgents[carAgentId].stroke)
+            .attr('stroke-width', 3)
             .attr('r', 10);
     }
+    _drawDynamicCarAgent(carAgentId, startNodeId, endNodeId, travelTime) {
+        this._purgeCarAgent(carAgentId);
+        
+        let startCoordTransStr = d3.select('#circle'+startNodeId).attr('transform'),
+            startCoordSplit = startCoordTransStr.substring(10, startCoordTransStr.length - 1).split(','),
+            startX = startCoordSplit[0],
+            startY = startCoordSplit[1];
+        let endCoordTransStr = d3.select('#circle'+endNodeId).attr('transform'),
+            endCoordSplit = endCoordTransStr.substring(10, endCoordTransStr.length - 1).split(','),
+            endX = endCoordSplit[0],
+            endY = endCoordSplit[1];
 
+        let t = d3.transition()
+            .duration(travelTime)
+            .ease(d3.easeLinear);
+        let circle = SVG.append("circle")
+            .attr('id', "agent"+carAgentId)
+            .attr('cx', startX)
+            .attr('cy', startY)
+            .attr('fill', this.carAgents[carAgentId].color)
+            .attr('stroke', this.carAgents[carAgentId].stroke)
+            .attr('stroke-width', 3)
+            .attr('r', 10)
+          .transition(t)
+            .attr('cx', endX)
+            .attr('cy', endY);
+
+        console.log('Animating ENTER', startX, startY, endX, endY);
+    }
     _purgeCarAgent(carAgentId) {
         d3.select('#agent'+carAgentId).remove();
     }
@@ -89,6 +125,7 @@ class carAgentEvent {
 /* Uses dict-type of lists ({"000":"LOCAL", "001":"GLOBAL"}) */
 class Simulation {
     constructor(logs) {
+        this.running = false;
         this.animation = new Animation();
         for (let i = 0; i < logs.length; i++) {
             if (logs[i]['type'] === "carAgents.log") {
@@ -125,6 +162,7 @@ class Simulation {
      * - FOR NOW only traverse carAgents.log. TODO: traverse planner and query most current event and so on 
      */
     start() {
+        this.running = true;
         let initTsString = this.carAgentsEvents[0].split(';')[0].trim();
         let initTimeMs = new Date(initTsString).getTime();
         
@@ -133,9 +171,16 @@ class Simulation {
                 cae = new carAgentEvent(line),
                 thiz = this;
             setTimeout(function() {
-                thiz.animation.animateCarAgent(cae);
+                if (thiz.running) {
+                    thiz.animation.animateCarAgent(cae);
+                }
             }, cae.ts - initTimeMs);
         }
+    }
+
+    stop() {
+        this.animation.purgeAllAnimation();
+        this.running = false;
     }
 }
 
@@ -183,8 +228,7 @@ let drawGraph = function() {
                     fill: "grey",
                     r: radius * 1.5
                 });
-            }
-            )
+            })
             .on('mouseout', function(d, i) {
                 $("#circle"+i).attr({
                     fill: "black",
@@ -195,9 +239,7 @@ let drawGraph = function() {
             .attr('id', function(d) { return 'circle'+d.id; })
             .attr("r", radius)
             .attr('title', function(d) { return d.id; })
-            .attr('data-toggle', 'tooltip');
-            
-        
+            .attr('data-toggle', 'tooltip');        
     
         let sim = d3.forceSimulation(graph.nodes)
             .force("charge", d3.forceManyBody().strength(-100))
@@ -291,7 +333,7 @@ let runSimulation = function() {
         $('#btnRun').prop('disabled', true);
         $('#btnStop').prop('disabled', false);
 
-        let simulation = new Simulation(retrievedLogs);
+        simulation = new Simulation(retrievedLogs);
         simulation.start();
 
         toastr.success(`Starting Simulation <${selectedSim}>`);
@@ -302,7 +344,7 @@ let stopSimulation = function() {
     $('#btnRun').prop('disabled', false);
     $('#btnStop').prop('disabled', true);
 
-    // TODO: enable stopping of sim (and animate purges)
+    simulation.stop();
 
     toastr.error(`Simulation <${$('#simulationRun').val()}> stopped.`);
 };

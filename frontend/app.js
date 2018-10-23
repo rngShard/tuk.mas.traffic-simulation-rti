@@ -26,7 +26,6 @@ var config = require('./config/config');    // place config file, being ignored 
 /* Model */
 
 // var dataAccess = require('./model/mongoConnection')(config);   // No DB access needed
-var simulationStore = undefined    // TODO: (controller) simulationStore (that stores time steps)
 var masSimulatorConnection = require('./model/masSimulatorConnection')();
 
 /* View */
@@ -35,7 +34,6 @@ app.use('/', require('./routes/index')(masSimulatorConnection));
 
 /* Controller */
 
-// app.use('/store/', require('./controller/store'));   // TODO: simStore
 app.use('/api/', require('./controller/api')(masSimulatorConnection));
 
 /* misc */
