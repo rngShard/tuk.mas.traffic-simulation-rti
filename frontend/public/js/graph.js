@@ -86,7 +86,7 @@ class Animation {
             .attr('cx', endX)
             .attr('cy', endY);
 
-        console.log('Animating ENTER', startX, startY, endX, endY);
+        // console.log('Animating ENTER', startX, startY, endX, endY);
     }
     _purgeCarAgent(carAgentId) {
         d3.select('#agent'+carAgentId).remove();
@@ -298,8 +298,8 @@ let updateGraph = function() {
 };
 let toggleEnabledRunOpts = function(activeGraph) {
     $('#simulationRun').children().prop('disabled', function() {
-        let allowedGraphIdx = parseInt($(this).attr('data-graph'));
-        return !isNaN(allowedGraphIdx) && allowedGraphIdx !== parseInt(activeGraph);
+        let allowedGraphName = $(this).attr('data-graph');
+        return allowedGraphName !== undefined && allowedGraphName !== activeGraph;
     });
 };
 

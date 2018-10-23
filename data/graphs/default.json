@@ -1,0 +1,27 @@
+{
+    "directed": true,
+    "graph": {
+        "name": "testGraph"
+    },
+    "links": [
+        {"source": 0, "target": 1, "value":1},
+        {"source": 1, "target": 2, "value":2},
+        {"source": 2, "target": 3, "value":2},
+        {"source": 3, "target": 4, "value":1},
+        {"source": 0, "target": 5, "value":8},
+        {"source": 2, "target": 5, "value":8},
+        {"source": 3, "target": 6, "value":3},
+        {"source": 4, "target": 6, "value":4},
+        {"source": 5, "target": 4, "value":2}
+    ],            
+    "multigraph": false,
+    "nodes": [
+        {"id": 0},
+        {"id": 1},
+        {"id": 2},
+        {"id": 3},
+        {"id": 4},
+        {"id": 5},
+        {"id": 6}
+    ]
+}

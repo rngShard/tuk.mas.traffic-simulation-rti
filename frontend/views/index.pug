@@ -11,12 +11,12 @@ block content
 					label(for='activeGraph') Active Graph
 					select.form-control#activeGraph(onchange='updateGraph();')
 						for title, i in graphTitles
-							option(value=i)= title
+							option= title
 					label(for='simulationRun') Simulation Run
 					select.form-control#simulationRun(onchange='loadLogs();')
 						option None
 						for logInfo in logInfos
-							option(data-graph=logInfo.graphIdx)= logInfo.id
+							option(data-graph=logInfo.graphName)= logInfo.id
 					.sim-controls(style='text-align:center; margin-top:1em;')
 						button.btn.btn-success#btnRun(onclick='runSimulation();' disabled) Run
 						button.btn.btn-danger#btnStop(onclick='stopSimulation();' disabled) Stop
