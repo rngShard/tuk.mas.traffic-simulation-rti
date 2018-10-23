@@ -50,14 +50,7 @@ class Animation {
             s = transformString.substring(10, transformString.length - 1).split(','),
             x = s[0],
             y = s[1];
-        let circle = SVG.append("circle")
-            .attr('id', "agent"+carAgentId)
-            .attr('cx', x)
-            .attr('cy', y)
-            .attr('fill', this.carAgents[carAgentId].color)
-            .attr('stroke', this.carAgents[carAgentId].stroke)
-            .attr('stroke-width', 3)
-            .attr('r', 10);
+        this._drawAgentCircle(carAgentId, x, y);
     }
     _drawDynamicCarAgent(carAgentId, startNodeId, endNodeId, travelTime) {
         this._purgeCarAgent(carAgentId);
@@ -74,22 +67,25 @@ class Animation {
         let t = d3.transition()
             .duration(travelTime)
             .ease(d3.easeLinear);
-        let circle = SVG.append("circle")
-            .attr('id', "agent"+carAgentId)
-            .attr('cx', startX)
-            .attr('cy', startY)
-            .attr('fill', this.carAgents[carAgentId].color)
-            .attr('stroke', this.carAgents[carAgentId].stroke)
-            .attr('stroke-width', 3)
-            .attr('r', 10)
-          .transition(t)
-            .attr('cx', endX)
-            .attr('cy', endY);
-
-        // console.log('Animating ENTER', startX, startY, endX, endY);
+        
+        let circle = this._drawAgentCircle(carAgentId, startX, startY)
+            .transition(t)
+                .attr('cx', endX)
+                .attr('cy', endY);
     }
     _purgeCarAgent(carAgentId) {
         d3.select('#agent'+carAgentId).remove();
+    }
+
+    _drawAgentCircle(carAgentId, x, y) {
+        return SVG.append("circle")
+            .attr('id', "agent"+carAgentId)
+            .attr('cx', x)
+            .attr('cy', y)
+            .attr('fill', this.carAgents[carAgentId].color)
+            .attr('stroke', this.carAgents[carAgentId].stroke)
+            .attr('stroke-width', 3)
+            .attr('r', 8)
     }
 }
 
@@ -132,10 +128,13 @@ class Simulation {
                 this.carAgentsEvents = logs[i]['lines'];
                 this.animation.setCarAgents(this._extractCarAgents(logs[i]['lines']));
             } else if (logs[i]['type'] === "plannerAgent.log") {
-                // this.plannerAgentEvents = logs[i]['lines'];
+                this.plannerAgentEvents = logs[i]['lines'];
+                
                 // TODO: animate events
+                console.log(this._extractAgentPaths(logs[i]['lines']));
+                
             } else {
-                toastr.warning("Encountered unhandled log-type...");
+                console.warning("Encountered unhandled log-type...");
             }
         }
     }
@@ -153,6 +152,23 @@ class Simulation {
                 };
             }
             if (i >= logLines.length-1) { return carAgents; }
+        }
+    }
+
+    // note: no GOD; TODO: move GOD events to separate log
+    _extractAgentPaths(logLines) {
+        let agentPaths = {};
+        for (let i = 0; i < logLines.length; i++) {
+            let s = logLines[i].split(';'),
+                ts = new Date(s[0].trim()).getTime(),
+                agentId = s[1].trim();
+            if (agentPaths[agentId] === undefined)
+                agentPaths[agentId] = {};
+            agentPaths[agentId][ts] = {
+                nodes: s[2].trim().split(','),
+                travelTimes: s[3].trim().split(',')
+            };
+            if (i >= logLines.length-1) { return agentPaths; }
         }
     }
 
@@ -176,6 +192,9 @@ class Simulation {
                 }
             }, cae.ts - initTimeMs);
         }
+
+        // TODO: timeOuts on event indication
+                
     }
 
     stop() {
@@ -191,7 +210,6 @@ let drawGraph = function() {
 
     let w = $('#chart').width(),
         h = w/2;
-        // fill = d3.schemeCategory10;
     
     let svg = d3.select("#chart")
       .append("svg:svg")

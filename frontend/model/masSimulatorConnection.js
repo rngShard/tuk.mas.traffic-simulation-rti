@@ -7,7 +7,7 @@ const NUM_ASSOC_LOGS = 2;
 const GRAPH_DIR_PATH = path.resolve('../data/graphs/');
 
 module.exports = function() {
-
+    
     /* Graphs */
 
     let graphs = {},
@@ -40,7 +40,7 @@ module.exports = function() {
 
     this.getAllGraphTitles = function() {
         return Object.keys(graphs);
-    }
+    };
 
 
     /* Logs */
