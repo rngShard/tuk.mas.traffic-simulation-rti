@@ -9,11 +9,17 @@ class Animation {
     setCarAgents(carAgents) {
         this.carAgents = {};
         for (let [id, attrs] of Object.entries(carAgents)) {
+            let rand = Math.random() * .7 + .3;
             this.carAgents[id] = {
                 stroke: attrs.type === "LOCAL" ? 'red' : attrs.type === "GLOBAL" ? 'green' : 'blue',
-                color: d3.interpolateBlues((Math.random()+1)/2)
+                color: d3.interpolateBlues(rand),   // ((Math.random()+1)/2) ?
+                interpolVal: rand
             }
         }
+    }
+
+    setAgentPaths(agentPaths) {
+        this.agentPaths = agentPaths;
     }
 
     animateCarAgent(carAgentEvent) {
@@ -58,6 +64,30 @@ class Animation {
                     }, 500);
                 }
             });
+        });
+    }
+
+    animateAgentPath(agentId, ts) {
+        let newPathNodes = this.agentPaths[agentId][ts]['routeNodes'],
+            action = this.agentPaths[agentId][ts]['action'],
+            newColors = {
+                INIT: d3.interpolateBlues(this.carAgents[agentId].interpolVal),
+                REROUTE: d3.interpolateGreens(this.carAgents[agentId].interpolVal)
+            }, newSize = {
+                INIT: "10px",
+                REROUTE: "15px"
+            };
+        newPathNodes.forEach(function(nodeId) {
+            let c = $('#circle'+nodeId).css('fill'),
+                r = $('#circle'+nodeId).css('r');
+            $('#circle'+nodeId)
+                .css('fill', newColors[action])
+                .css('r',  newSize[action]);
+            setTimeout(function() {
+                $('#circle'+nodeId)
+                    .css('fill', c)
+                    .css('r', r);
+            }, 500);
         });
     }
 
@@ -154,13 +184,7 @@ class Simulation {
                 this.animation.setCarAgents(this._extractCarAgents(logs[i]['lines']));
             } else if (logs[i]['type'] === "plannerAgent.log") {
                 this.plannerAgentPaths = logs[i]['lines'];
-                
-                let extractedAgentPaths = this._extractAgentPaths(logs[i]['lines']);
-                // TODO: (nxt) animate pathPlanning
-                // - persist plans, fct agent-mouseover to read latest ts from persisted paths
-                // - queue animations (blink or stuff) for TSes where update/reroute
-                console.log(extractedAgentPaths);
-
+                this.animation.setAgentPaths(this._extractAgentPaths(logs[i]['lines']));
             } else if (logs[i]['type'] === "events.log") {
                 this.godlyEvents = logs[i]['lines'];
             } else {
@@ -195,8 +219,8 @@ class Simulation {
             }
             agentPaths[agentId][ts] = {
                 action: s[1].trim().toUpperCase(),
-                routeNodes: s[3].trim().split(','),
-                routeLinkValues: s[4].trim().split(',')
+                routeNodes: s[3].trim().split(',')
+                // routeLinkValues: s[4].trim().split(',')
             }
             if (i >= logLines.length-1) { return agentPaths; }
         }
@@ -211,7 +235,7 @@ class Simulation {
         this.running = true;
         let initTsString = this.carAgentsEvents[0].split(';')[0].trim();
         let initTimeMs = new Date(initTsString).getTime();
-        // careful: initialTime is set to first entry ts in `carAgents.log` (!!!)   // FIXME: is initTs ok like this?
+        // careful: initialTime is set to first entry ts in `carAgents.log` (!!!)
         
         /* animate carAgent spawns, movements etc. */
         for (let i = 0; i < this.carAgentsEvents.length; i++) {
@@ -236,6 +260,20 @@ class Simulation {
             setTimeout(function() {
                 if (thiz.running) {
                     thiz.animation.animateGodlyEvent(routeNodePairStrings, factor);
+                }
+            }, ts - initTimeMs);
+        }
+        
+        /* animate agent-path INIT and REROUTE */
+        for (let i = 0; i < this.plannerAgentPaths.length; i++) {
+            let line = this.plannerAgentPaths[i],
+                s = line.split(';');
+            let ts = new Date(s[0].trim()).getTime(),
+                agentId = s[2].trim();
+            let thiz = this;
+            setTimeout(function() {
+                if (thiz.running) {
+                    thiz.animation.animateAgentPath(agentId, ts);
                 }
             }, ts - initTimeMs);
         }                
@@ -381,7 +419,7 @@ let loadLogs = function() {
         $.get('http://localhost:3000/api/logs/'+selectedSim, function(res) {
             let logs = res.payload;
 
-            if (logs.length === 0) { console.log('ERROR: loadLogs did not retrieve actual logs !!'); }  // shouldn't happen
+            if (logs.length === 0) { console.error('ERROR: loadLogs did not retrieve actual logs !!'); }  // shouldn't happen
             logs.forEach(function(log) {
                 $(`#${log['type'].replace('.','DOT')}`).val(log['lines'].join('\n'));
             });
