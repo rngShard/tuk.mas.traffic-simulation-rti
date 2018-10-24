@@ -128,11 +128,17 @@ class Simulation {
                 this.carAgentsEvents = logs[i]['lines'];
                 this.animation.setCarAgents(this._extractCarAgents(logs[i]['lines']));
             } else if (logs[i]['type'] === "plannerAgent.log") {
-                this.plannerAgentEvents = logs[i]['lines'];
+                this.plannerAgentPaths = logs[i]['lines'];
                 
+                let extractedAgentPaths = this._extractAgentPaths(logs[i]['lines']);
+                console.log(extractedAgentPaths);
+                // TODO: (nxt) animate pathPlanning
+
+            } else if (logs[i]['type'] === "events.log") {
+
+                console.log('todoEventPlanin');
                 // TODO: animate events
-                console.log(this._extractAgentPaths(logs[i]['lines']));
-                
+
             } else {
                 console.warning("Encountered unhandled log-type...");
             }
@@ -142,8 +148,7 @@ class Simulation {
     _extractCarAgents(logLines) {
         let carAgents = {};
         for (let i = 0; i < logLines.length; i++) {
-            let logLine = logLines[i];
-            let s = logLine.split(';');
+            let s = logLines[i].split(';');
             if (s[1].trim() === "SPAWN") {
                 let agentId = s[2].trim(),
                     agentType = s[4].trim();
@@ -155,19 +160,20 @@ class Simulation {
         }
     }
 
-    // note: no GOD; TODO: move GOD events to separate log
     _extractAgentPaths(logLines) {
         let agentPaths = {};
         for (let i = 0; i < logLines.length; i++) {
-            let s = logLines[i].split(';'),
-                ts = new Date(s[0].trim()).getTime(),
-                agentId = s[1].trim();
-            if (agentPaths[agentId] === undefined)
+            let s = logLines[i].split(';');
+            let agentId = s[2].trim(),
+                ts = new Date(s[0].trim()).getTime();
+            if (s[1].trim() === "INIT") {
                 agentPaths[agentId] = {};
+            }
             agentPaths[agentId][ts] = {
-                nodes: s[2].trim().split(','),
-                travelTimes: s[3].trim().split(',')
-            };
+                action: s[1].trim().toUpperCase(),
+                routeNodes: s[3].trim().split(','),
+                routeLinkValues: s[4].trim().split(',')
+            }
             if (i >= logLines.length-1) { return agentPaths; }
         }
     }
@@ -325,6 +331,7 @@ var retrievedLogs = [];
 let loadLogs = function() {
     $('#carAgentsDOTlog').val('');
     $('#plannerAgentDOTlog').val('');
+    $('#eventsDOTlog').val('');
     retrievedLogs = [];
 
     let selectedSim = $('#simulationRun').val();    // selectedSimi <==> logId

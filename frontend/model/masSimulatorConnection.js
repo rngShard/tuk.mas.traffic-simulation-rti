@@ -3,7 +3,7 @@ const readline = require('readline');
 const fs = require('fs');
 
 const LOG_DIR_PATH = path.resolve('../data/sim_logs/');
-const NUM_ASSOC_LOGS = 2;
+const NUM_ASSOC_LOGS = 3;   // carAgents.log, plannerAgent.log, events.log
 const GRAPH_DIR_PATH = path.resolve('../data/graphs/');
 
 module.exports = function() {
@@ -46,13 +46,6 @@ module.exports = function() {
     /* Logs */
 
     let accumLogs = [];
-    let readLogLines = function(logFileName, array) {
-        let rl = readline.createInterface({
-            input: fs.createReadStream(LOG_DIR_PATH+'/'+logFileName),
-            crlfDelay: Infinity
-        });
-        rl.on('line', (line) => { array.push(line); });
-    };
     fs.readdir(LOG_DIR_PATH, (err, files) => {
         files.forEach(logFileName => {
             let lines = [],
