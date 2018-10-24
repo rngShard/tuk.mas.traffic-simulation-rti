@@ -36,6 +36,31 @@ class Animation {
         }
     }
 
+    animateGodlyEvent(routeNodePairStrings, factor) {
+        let color = d3.interpolateReds(factor);
+        routeNodePairStrings.forEach(function(pairStrings) {
+            let s = pairStrings.substring(1,pairStrings.length-1).split('-'),
+                node1 = s[0],
+                node2 = s[1];
+            ['line-'+node1+'-'+node2, 'line-'+node2+'-'+node1].forEach(function(possibleLineId) {
+                let linkStrokeWidthOld = $('#'+possibleLineId).css('stroke-width');
+                // let linkStrokeColorOld = $('#'+possibleLineId).css('stroke');
+                if (!d3.select('#'+possibleLineId).empty()) {
+                    $('#circle'+node1).css('fill', color);
+                    $('#circle'+node2).css('fill', color);
+                    $('#'+possibleLineId)
+                        .css('stroke', color)
+                        .css('stroke-width', 4);
+                    setTimeout(function() {
+                        $('#circle'+node1).css('fill', 'black');
+                        $('#circle'+node2).css('fill', 'black');
+                        $('#'+possibleLineId).css('stroke-width', linkStrokeWidthOld);
+                    }, 500);
+                }
+            });
+        });
+    }
+
     purgeAllAnimation() {
         let thiz = this;
         Object.keys(this.carAgents).forEach(function(agentId) {
@@ -131,14 +156,13 @@ class Simulation {
                 this.plannerAgentPaths = logs[i]['lines'];
                 
                 let extractedAgentPaths = this._extractAgentPaths(logs[i]['lines']);
-                console.log(extractedAgentPaths);
                 // TODO: (nxt) animate pathPlanning
+                // - persist plans, fct agent-mouseover to read latest ts from persisted paths
+                // - queue animations (blink or stuff) for TSes where update/reroute
+                console.log(extractedAgentPaths);
 
             } else if (logs[i]['type'] === "events.log") {
-
-                console.log('todoEventPlanin');
-                // TODO: animate events
-
+                this.godlyEvents = logs[i]['lines'];
             } else {
                 console.warning("Encountered unhandled log-type...");
             }
@@ -187,7 +211,9 @@ class Simulation {
         this.running = true;
         let initTsString = this.carAgentsEvents[0].split(';')[0].trim();
         let initTimeMs = new Date(initTsString).getTime();
+        // careful: initialTime is set to first entry ts in `carAgents.log` (!!!)   // FIXME: is initTs ok like this?
         
+        /* animate carAgent spawns, movements etc. */
         for (let i = 0; i < this.carAgentsEvents.length; i++) {
             let line = this.carAgentsEvents[i],
                 cae = new carAgentEvent(line),
@@ -199,8 +225,20 @@ class Simulation {
             }, cae.ts - initTimeMs);
         }
 
-        // TODO: timeOuts on event indication
-                
+        /* animate global (godly) events */
+        for (let i = 0; i < this.godlyEvents.length; i++) {
+            let line = this.godlyEvents[i],
+                s = line.split(';');
+            let ts = new Date(s[0].trim()).getTime(),
+                routeNodePairStrings = s[1].trim().split(','),
+                factor = s[2].trim();
+            let thiz = this;
+            setTimeout(function() {
+                if (thiz.running) {
+                    thiz.animation.animateGodlyEvent(routeNodePairStrings, factor);
+                }
+            }, ts - initTimeMs);
+        }                
     }
 
     stop() {
@@ -211,6 +249,7 @@ class Simulation {
 
 
 let drawGraph = function() {
+    $('[data-toggle="tooltip"]').tooltip('hide');
     document.getElementById('chart').innerHTML = '';
     $('#btnRun').prop('disabled', true);
 
@@ -237,6 +276,9 @@ let drawGraph = function() {
         let links = svg.selectAll("line.link")
             .data(graph.links)
           .enter().append("svg:line")
+            .attr('id', function(d) { return 'line-'+d.source+'-'+d.target; })
+            .attr('title', function(d) { return d.value; })
+            .attr('data-toggle', 'tooltip')
             .attr("class", "link")
             .attr("x1", function(d) { return d.source.x; })
             .attr("y1", function(d) { return d.source.y; })
