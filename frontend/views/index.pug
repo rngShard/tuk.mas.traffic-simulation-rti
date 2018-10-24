@@ -2,53 +2,33 @@ extends layout
 
 block content
 	.container
-		h1 WIP: Simulated Traffic Network Visualization
+		h1 Simulated Traffic Network Visualization
 		.row
 			.col-md-10
 				#chart
 			.col-md-2
 				.form-group
-				label(for='activeGraph') Active Graph
-				select.form-control#activeGraph(onchange='updateGraph();')
-					for title, i in graphTitles
-						option(value=i)= title
+					label(for='activeGraph') Active Graph
+					select.form-control#activeGraph(onchange='updateGraph();')
+						for title, i in graphTitles
+							option= title
+					label(for='simulationRun') Simulation Run
+					select.form-control#simulationRun(onchange='loadLogs();')
+						option None
+						for logInfo in logInfos
+							option(data-graph=logInfo.graphName)= logInfo.id
+					.sim-controls(style='text-align:center; margin-top:1em;')
+						button.btn.btn-success#btnRun(onclick='runSimulation();' disabled) Run
+						button.btn.btn-danger#btnStop(onclick='stopSimulation();' disabled) Stop
+					.sim-controls(style='text-align:center; margin-top:2em;')
+						button.btn.btn-info(onclick=`$('circle[data-toggle="tooltip"]').tooltip('toggle');`) Toggle Node Values
+						button.btn.btn-info(onclick=`$('line[data-toggle="tooltip"]').tooltip('toggle');`) Toggle Link Values
 		.row
-			| .. timeline ..
+			each logType in ['carAgentsDOTlog', 'plannerAgentDOTlog', 'eventsDOTlog']
+				.col-md-4.form-group
+					label(for=logType)
+						i= logType.replace('DOT', '.')
+					textarea(id=logType disabled)
 
 	script(src='libs/d3/dist/d3.min.js')
 	script(src='js/graph.js')
-
-	
-	//- div(class="col-md-4")
-	//-   h2 Create user
-
-	//-   form(action="/users/create", method="post", class="well")
-	//-     div(class="form-group")
-	//-       label(for="username")
-	//-         | Username
-	//-       input(type="text", name="username", class="form-control")
-	//-     input(type="submit" class="btn btn-default")
-
-	//- div(class="col-md-6")
-	//-   h2 Users
-
-	//-   ul
-	//-   each user in users
-	//-     li
-	//-       strong
-	//-         = user.username
-	//-       | &nbsp;
-	//-       a(href="/users/" + user.id + "/destroy", class="btn btn-xs btn-warning") delete
-	//-       ul
-	//-         li
-	//-           | Create task
-	//-           form(action="/users/" + user.id + "/tasks/create", method="post", class="form-inline")
-	//-             div(class="form-group")
-	//-               input(type="text", name="title", class="input-sm form-control")
-	//-               input(type="submit", class="btn btn-sm btn-default")
-	//-         each task in user.Tasks
-	//-           li
-	//-             strong
-	//-               = task.title
-	//-             | &nbsp;
-	//-             a(href="/users/" + user.id + "/tasks/" + task.id + "/destroy",  class="btn btn-xs btn-warning") delete
