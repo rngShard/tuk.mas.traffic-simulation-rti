@@ -16,7 +16,8 @@
     {\par\medskip\noindent\minipage{\linewidth}}
     {\endminipage\par\medskip}
 
-\usepackage{lipsum}  
+\usepackage{lipsum}
+\usepackage{parskip}    % spacing between paragraphs instead of indention  
 
 
 \title{Multi-agent Systems Project Report: \\
@@ -36,17 +37,24 @@
 
 
 \begin{abstract}
+    % when doc finished, summarize task+approach+results
     \lipsum[1]
+    \lipsum[2]
 \end{abstract}
 
 \tableofcontents
 
 \newpage
-\input{content/intro.tex}       % paraphrasing task description, foreshadowing setup + analysis, explaining sections
-\input{content/relatedWork.tex}     % go through provided sources (4) as well as (generally) connected material
+\input{content/intro.tex}       % CHECK; paraphrasing task description, foreshadowing setup + analysis, explaining sections
+\newpage
+\input{content/relatedWork.tex}     % TODO: (NXT) go through provided sources (4) as well as (generally) connected material
+\newpage
 \input{content/backend.tex}     % Python MAS setup, graph-type, agent-type, communication setup
-\input{content/frontend.tex}    % File-reading (graphs, logs), NodeJS architecture, D3, graph-drawing, UI
+\newpage
+\input{content/frontend.tex}    % TODO: File-reading (graphs, logs), NodeJS architecture, D3, graph-drawing, UI
+\newpage
 \input{content/performanceAnalysis.tex}     % performance metrics (planning- / arrival time), subjective inspection (viability) via frontend (?)
+\newpage
 \input{content/conclusion.tex}      % performances, MAS setup, traffic agent types (prob. of schedules), network visualization
 
 
