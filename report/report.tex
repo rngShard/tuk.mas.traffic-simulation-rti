@@ -19,11 +19,12 @@
 \usepackage{lipsum}  
 
 
-\title{Traffic Simulation based on Real-Time Information}
+\title{Multi-agent Systems Project Report: \\
+    Traffic Simulation based on Real-Time Information}
 
 \author[]{Konstantin Kloster}
 \author[]{Oliver Berg}
-\affil[1]{Technische Universität Kaiserslautern}
+\affil[1]{Technical University Kaiserslautern}
 
 \date{\today}
 
@@ -38,23 +39,15 @@
     \lipsum[1]
 \end{abstract}
 
-
-\section{Introduction}
-    \lipsum[2]
-
+\tableofcontents
 
 \newpage
-\section{Related Work}
-    \lipsum[3]
-    \cite{brakewood2018literature}
-    \cite{ksontini2016building}
-    \cite{mastio2015towards}
-    \cite{zargayouna2013agent}
-
-
-\newpage
-\section{Conclusion}
-    \lipsum[4] 
+\input{content/intro.tex}       % paraphrasing task description, foreshadowing setup + analysis, explaining sections
+\input{content/relatedWork.tex}     % go through provided sources (4) as well as (generally) connected material
+\input{content/backend.tex}     % Python MAS setup, graph-type, agent-type, communication setup
+\input{content/frontend.tex}    % File-reading (graphs, logs), NodeJS architecture, D3, graph-drawing, UI
+\input{content/performanceAnalysis.tex}     % performance metrics (planning- / arrival time), subjective inspection (viability) via frontend (?)
+\input{content/conclusion.tex}      % performances, MAS setup, traffic agent types (prob. of schedules), network visualization
 
 
 % \end{multicols}
