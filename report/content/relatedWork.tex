@@ -7,25 +7,23 @@ Resorting to holistic solutions like the above mentioned is especially useful fo
 
 In contrast to fully incorporated applications, some approaches in literature already shift focus towards surrounding aspects surrounding of traffic simulation, like focusing on the distributing simulation \cite{mastio2015towards}.
 
-% TODO: agent types / common architecture in literature (cars, planner)
-%   - \cite{mastio2015towards}, \cite{brakewood2018literature}
-\lipsum[1]
+As of \cite{mastio2015towards}, which depicts the simplest yet most fundamental approach to general network traversal, it utilizes a basic graph structure with vertices as intersection points and edges connecting these intersections. Agents are assigned a path over a fixed set of vertices as the shortest path over weighted edges. The travel time $t$ there depends on the number of agents currently on the edge in question. Calculating this $t$ can be done based on different kinds of functions modelling e.g. a certain free-flow capacity where for a given $n$ number of vehicles the weight ($t$) of an edge will not be impacted and only after reaching a certain threshold number $n_{\text{thresh}}$ the weight will increase to depict a slower movement (to a degree of $\alpha$) of traffic along said edge; like shown in \autoref{eq:edgeSpeed} - being a slightly modified version of the formulas used in \cite{mastio2015towards} and \cite{ksontini2016building}.
 
-% TODO: experiment setup as of sources
-\lipsum[2]
-\lipsum[3]
-\lipsum[4]
+\begin{equation}\label{eq:edgeSpeed}
+    t = 
+    \begin{cases}
+        s, & \text{if}\ n < n_{\text{thresh}} \\
+        s * \alpha(n - n_{\text{thresh}}), & \text{otherwise}
+    \end{cases}
+\end{equation}
 
-% TODO: some more ...
-\lipsum[5]
-\lipsum[6]
-\lipsum[7]
-\lipsum[8]
+To this agent-centric travel choice procedure, a literature review as is being depicted in the transport review of \cite{brakewood2018literature} adds a theoretical framework of traveler agent's perspective concerning travel- and mode choice as well as choices regarding route, boarding and departure. Incorporating this thinking, one ends up with a tight path-choosing procedure across multiple channels which theoretically boils down to the simple procedure of \autoref{eq:edgeSpeed} adapted to modes, routes and fixed schedules.
+As this framework is a theoretical methodology at heart, the practical implementation aspect of this formal procedure raises multiple performance and architectural issues which without utilizing afore-mentioned well-established holistic framework solutions is expected to introduce bottlenecks.
 
+As proposed by \cite{zargayouna2013agent}, agents adhere to a specific simulation workflow where they continuously query for updates regarding path choice whenever reaching nodes of the underlying network. Opposing the precise setup depicted here and utilizing in addition the thinking of \cite{mastio2015towards}, no precise time-step-based approach of procedurally checking all agents for their position but rather an event-based truly (distributed) multi-agent approach is implemented where agents query after complete time lapses instead of single short global time intervals. 
 
+The visualization procedure of a given simulation then needs to adhere to the time lapse nature of the event logs, which not necessarily adheres well to standards defined by holistic framework solutions (like used in \cite{zargayouna2013agent}\cite{ksontini2016building}). As visualization is a side-aspect of most MAS-focused implementations (see \cite{mastio2015towards}), this is generally speaking seen as an added bonus for both debugging and reporting purposes.
 
-% \cite{brakewood2018literature}
-% \cite{ksontini2016building}
-% \cite{mastio2015towards}
-% \cite{zargayouna2013agent}
-% + own found ones
+% CHECK if performance metrics util. like this
+Regarding performance metrics of a traffic simulation, metrics like use-of-transit, satisfaction and travelling-time are frequently proposed (\cite{brakewood2018literature}). With the use of dedicated car- and planner-agents (alongside \cite{zargayouna2013agent}) and the omittance of public transport time-table-based scheduling / availability-based carsharing, this leaves travelling-time as well as deviation from planning to execution performance as major indicators for performance.
+Enhancing this may be subjective monitoring of network behavior (\cite{brakewood2018literature}, \cite{zargayouna2013agent}).
