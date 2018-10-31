@@ -102,7 +102,10 @@ To ease the usage of the frontend navigation elements, they are en-/disabled bas
 
 \subsection{Web-based Animations with D3}\label{subsec:d3}
 
-% TODO: frontend4
+The underlying animation and visual display of graph elements are being done via the visualization library \textit{D3.js} \cite{bostock2012d3}.
+Generally speaking, it is based on the assumption that instead of separate independent graphical operations, D3 takes arrays of objects and manipulates (svg-) objects based on this set of provided data-points. Through procedure, the visualization of an array of vertices and edges becomes much more intuitive as well as computationally feasible.
+
+In \autoref{fig:web-ui-running}, you see a running simulation visualization as it is being projected on the drawn network graph.
 
 \begin{figure}
     \centering
@@ -111,7 +114,11 @@ To ease the usage of the frontend navigation elements, they are en-/disabled bas
     \label{fig:web-ui-running}
 \end{figure}
 
-- visualization library \textit{D3.js} \cite{bostock2012d3}
-  - visu graph
-  - visu array of objects
-  - visu animations
+The graph-drawing utilizes D3's dynamic visualization procedure to create a force-directed layout of the theoretical network description. Throughout D3's iteration, fixed positional and directional values are being applied, making the drawing process - though being dynamic - a deterministic process, thus drawing the same graph visualization of a given graph every time it is being called upon to be drawn on the canvases 2D plane.
+Animations are created by transform-operations on svg-elements on the canvases.
+
+Regarding concrete visualization of simulation-run events:
+Agents are drawn as circles of similar shape compared to nodes (as they are initially spawned on top of nodes of the network, thus maintaining similarity is intuitive) with borders indicating the type of (car-)agent displayed ("local" / "semi-local" / "global") and body colors ranging in the randomly interpolated blue spectrum.
+Upon path-scheduling by the planner-agent, the nodes of the identified path are briefly highlighted (increased in shape) in the same color as the agent the path was identified for. Updating paths only based on new link-values without rerouting does not prompt a visual feedback, while rerouting actions prompt similar highlighting as done uponm initialization, but in the respectively interpolated green color spectrum for all nodes included in the new path.
+
+The overall setup of animations is timestamp-based, as the globally initial (smallest) timestep in the car-agents-log is identified and set as \textit{time-0}, to then set timeouts for all other log entries based on the difference in timestamp values to this zero-time.
