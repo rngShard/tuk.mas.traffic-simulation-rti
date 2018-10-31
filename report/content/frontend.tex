@@ -7,12 +7,11 @@ Following the in \autoref{sec:backend} described MAS architecture, this section 
 
 The frontend application reads graphs from json-files as well as a corpus of simulation-run logging files.
 
-\subsubsection{Graphs}
+\subsubsection{Graphs}\label{subsubsec:graphs}
 
 The network graph json-files are generated via the Python framework GraphX and then stored as json-files in the project folder. These are then being read from the MAS backend as well as the frontend-application. The file format can be seen in the example of figure below.
 
 \begin{figure}[thp]
-    \label{fig:graphx}
     \centering
     \lstset{language=json, frame=single, linewidth=11cm}
     \begin{tabular}{c}
@@ -35,6 +34,7 @@ The network graph json-files are generated via the Python framework GraphX and t
         \end{lstlisting}
     \end{tabular}
     \caption{Example of GraphX output format (JSON)}
+    \label{fig:graphx}
 \end{figure}
 
 These graphs are being read form disc and parsed into program structures (backend) or exposed to an API (frontend, see \autoref{subsec:frontendArchitecture}).
@@ -82,15 +82,35 @@ Through the dedicated intermediate API layer, access control for resources as re
 
 \subsection{User Interface Experience}
 
-% TODO: frontend3
-Plain HTML, CSS, JavaScript whilst utilizing D3 for visus (more on that in \autoref{subsec:d3}).
+The exposed User Interface depicts a web-page written in plain HTML5, CSS3 and JavaScript with the help of common libraries such as \textit{jQuery} and \textit{Bootstrap} for simple best-practice setup in addition to \textit{toastr} for notifications (see \autoref{fig:web-ui-init}).
 
-- Navigation flow, Selection, Disables, Displayed Information
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/web-ui-init.png}
+    \caption{Web-UI upon initial loading of the page}
+    \label{fig:web-ui-init}
+\end{figure}
+
+For canvas-based visualization and especially animation, the visualization library \textit{D3.js} was utilized (more on that in \autoref{subsec:d3}).
+
+The navigation flow adheres to basic top-to-bottom / left-to-right principle: The network graph is displayed in the canvas to the upper left, from which the selections take place to its right via selection panels for graph and simulation run. Controls regarding run visualization are positioned directly under the run selection with appropriate colors for starting and stopping. General non-intrusive display options (turning on Node-ID / Link-ID displays) are presented in more neutral blue color and positioned below the other primary controls.
+
+Below the basic visualization panel, textareas are used to display retrieved current-run logs (conforming to the conventions established in \autoref{subsubsec:graphs}). These serve the purpose to more intuitively display the information available from the simulation for visualization, as well as give instant feedback to selections made regarding the simulation run. Selections made regarding graph network immediately prompt a redrawing of the new network. All selections and button presses yield immediate visual feedback (via onchange-events).
+
+To ease the usage of the frontend navigation elements, they are en-/disabled based on the state of the application. As such, only simulation runs belonging to the currently active (drawn) graph are enabled for selection in the second select, the run-button only gets enabled with a drawn graph and selected run and the stop-button is disabled as long as no simulation is running.
 
 
 \subsection{Web-based Animations with D3}\label{subsec:d3}
 
 % TODO: frontend4
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/web-ui-running.png}
+    \caption{Web-UI with running visualization}
+    \label{fig:web-ui-running}
+\end{figure}
+
 - visualization library \textit{D3.js} \cite{bostock2012d3}
   - visu graph
   - visu array of objects
