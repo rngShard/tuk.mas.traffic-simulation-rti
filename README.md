@@ -1,7 +1,22 @@
-# Traffic Simulation based on Real-Time Information
+# MAS-Project: Traffic Simulation based on Real-Time Information
+
+## Project Structure
+
+Please find this project's sub-modules in their respective folders:
+
+- NodeJS-based frontend simulator visualization application in `frontend/`
+  - contains **instructions how to start web-bsaed UI**
+- Python MAS simulator in `backend/`
+  - contains **instructions how to start simulator** 
+  <!-- TODO make sure start-up instructions are provided for backend -->
+- utilized data / logging files (generated from backend, util. in frontend) in `data/`
+- Latex project report in `report/`
 
 ## Task description:
 
+_(as of officially provided project material)_
+
+"
 Supporting travelers with *real-time information*  (RTI) has become a proven technology in providing
 passengers with optimal routes. Classically, RTI has been used by transit providers for operations and
 control purposes. More recently, RTI is increasingly available to travelers on public (e.g., signage at
@@ -18,8 +33,11 @@ slowing down traffic). As a result, travel agents might be in a dynamic relation
 such that, when the expected travel times change, a reaction is possible by updating the route. In this
 case, it might be necessary to divert the travelers such that the congestion is overcome without relocating
 the congestion to different paths of the network.
+"
 
 ## Main tasks:
+
+_(as of officially provided project material; some example tasks)_
 
 - Build a simulation platform, where agents consider the shortest path between their origin and destination based on the current state of the network (a visualization is highly recommended).
     - At each vertex, following the dynamics of the network, agents might check if a better path is available.
@@ -29,6 +47,8 @@ the congestion to different paths of the network.
 - Finally, we might examine the resilience of the system to stochastic events that lead to a reduction in capacity of an edge / arc (e.g., accidents or breakdowns).
 
 ## References
+
+_(as of officially provided project material)_
 
 [1] Brakewood, C., Watkins, K.: A literature review of the passenger benefits of real-time transit information, Transport Reviews, 30 pages, (2018).
 

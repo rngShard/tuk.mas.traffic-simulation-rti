@@ -3,3 +3,15 @@ npm-debug.log
 
 # ignore config with login data (endpoints, passwords)
 config/config.js
+
+# ignore latex temp. compiles
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.fdb_latexmk
+*.fls
+*.out
+report.log
+*.synctex.gz
+*.toc
