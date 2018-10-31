@@ -1,7 +1,91 @@
 \section{Web-based Simulation Frontend}\label{sec:frontend}
 
-\lipsum[4]
+Following the in \autoref{sec:backend} described MAS architecture, this section now presents the web-based frontend application visualizing a simulation run based on the persisted simulation run logging information and other provided miscellaneous resources. 
 
-% File-reading (graphs, logs), NodeJS architecture, D3, graph-drawing, UI
 
-% Implemented using plain HTML, CSS and JavaScript whilst utilizing the visualization library \textit{D3.js} \cite{bostock2012d3}.
+\subsection{Persisted Logging Information}
+
+The frontend application reads graphs from json-files as well as a corpus of simulation-run logging files.
+
+\subsubsection{Graphs}
+
+The network graph json-files are generated via the Python framework GraphX and then stored as json-files in the project folder. These are then being read from the MAS backend as well as the frontend-application. The file format can be seen in the example of figure below.
+
+\begin{figure}[thp]
+    \label{fig:graphx}
+    \centering
+    \lstset{language=json, frame=single, linewidth=11cm}
+    \begin{tabular}{c}
+        \begin{lstlisting}
+{
+    "directed": false,
+    "graph": {
+        "name": "A Testing Graph"
+    },
+    "links": [
+        {"source": 0, "target": 1, "value":1},
+        {"source": 1, "target": 0, "value":2}
+    ],
+    "multigraph": false,
+    "nodes": [
+        {"id": 0, "color": "purple", "size": 16},
+        {"id": 1, "color": "green", "size": 9}
+    ]
+}
+        \end{lstlisting}
+    \end{tabular}
+    \caption{Example of GraphX output format (JSON)}
+\end{figure}
+
+These graphs are being read form disc and parsed into program structures (backend) or exposed to an API (frontend, see \autoref{subsec:frontendArchitecture}).
+
+They do however only depict the formal structure of the graph, which is all the backend needs to simulate agent paths. For a proper visualization of the graph on the 2D image plane, the web-frontend additionally utilizes some formal graph-drawing algorithms (see \autoref{subsec:d3}).
+
+\subsubsection{Simulation-Logs}
+
+The simulation logs are the actual output of the traffic simulator and come on a collection of multiple associated logs: 
+
+\begin{itemize}
+    \item \textit{[id]-[graphId]-carAgents.log}
+    \item \textit{[id]-[graphId]-plannerAgent.log}
+    \item \textit{[id]-[graphId]-events.log}
+\end{itemize}
+
+Each log is named by a unique id which is unique only across multiple sets of different logs but coherent across all associated logs. This allows to map each carAgents-log to its respective event-log and plannerAgent-log.
+The graph-id is specified for each set of associated logs in order to map the utilized graph to the logs. Logs of a respective simulation run can only be visualized for the specified graph it was run on.
+
+Each log-file has lines for any event occurring at a specified point in time (indicated with the line's initial timestamp-value) and multiple values separated with semicolons.
+
+The \textbf{carAgents-log} holds lines structured with values of: \textit{timestamp} (ts), \textit{action} ("spawn" / "enter" / "reach" / "despawn"), \textit{agentID} and depending on the action some more attributes. It as such depicts the events thrown by car-agents and logged to reason about their timely execution.
+Action-type "spawn" gets additional attributes \textit{spawnNode} and \textit{agentType} to specify where and which kind of (car-)agent was spawned. 
+Action-type "enter" gets additional attributes \textit{linkEdgeFrom}, \textit{linkEdgeTo} and \textit{linkValue} to specify which edge the agent entered and at which speed he will traverse the link.
+Action-type "reach" gets the additional attribute \textit{node} to declare which node the agent has just reached.
+Action-type "despawn" finally does not get additional attributes as this action only indicates to remove the agent from all later considerations.
+
+The \textbf{plannerAgent-log} holds lines structured with values of: \textit{timestamp} (ts), \textit{action} ("init" / "update" / "reroute"), \textit{agentId}, \textit{routeNodes} and \textit{routeLinkValues}, where the both "routeNodes" and "routeLinkValues" are lists of ids / numbers respectively indicating graph edges and edge weights of paths. As such this log captures the path planning done by the planner-agent for car-agents on initialization, updating of path link weights when reaching vertices or rerouting with new vertices and edges all together.
+
+The \textbf{events-log} holds lines structured with values of: \textit{timestamp} (ts), \textit{listOfEdges} and \textit{factor}, where the "listOfEdges" presents a list of nodes that identify links between them to be impacted in their weight / speed by the provided "factor".
+As such, the events viable for the application include all types of events that impact a given set of linked concerning travelling speed. This type of event was identified as being the most general one whilst having a major impact in route planning and provides intuitive real-world counterparts (e.g. break-down of a node slows down all traffic to that node, break down in a rode is a single link being impacted, new road means a single link becomes faster to use).
+
+
+\subsection{Frontend Architecture}\label{subsec:frontendArchitecture}
+
+% TODO: frontend2
+- NodeJS with internal application
+
+
+\subsection{User Interface Experience}
+
+% TODO: frontend3
+Plain HTML, CSS, JavaScript whilst utilizing D3 for visus (more on that in \autoref{subsec:d3}).
+
+- Navigation flow, Selection, Disables, Displayed Information
+
+
+\subsection{Web-based Animations with D3}\label{subsec:d3}
+
+% TODO: frontend4
+- visualization library \textit{D3.js} \cite{bostock2012d3}
+  - visu graph
+  - visu array of objects
+  - visu animations
