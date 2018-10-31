@@ -70,8 +70,14 @@ As such, the events viable for the application include all types of events that 
 
 \subsection{Frontend Architecture}\label{subsec:frontendArchitecture}
 
-% TODO: frontend2
-- NodeJS with internal application
+The overall frontend application's architecture is based on a traditional Model-View-Controller setup implemented in NodeJS. The webserver is setup to listen to port 3000 and receive http requests to then respond with the corresponding page content.
+
+Internally, an API plays the role of the controller-component connecting the view-layer to the model. This interface is being utilized primarily to expose local file data to the end-user via a unified interface, preemptively resolving possible difficulties connecting the frontend application to the backend result or later adding further functionality based on said data. It is used to return json-formated data on graphs, logs and other miscellaneous internal status information.
+
+The API primarily talks to the \textit{masSimulatorConnection} which reads, formats and persists logging and graph information as it is being setup in the web-UI.
+Please note that as such the web-page is not quite capable to handle multi-user when being deployed, but rather a single user entity.
+
+Through the dedicated intermediate API layer, access control for resources as requested by the end-user application would be both possible and straight -forward to implement later on if needed.
 
 
 \subsection{User Interface Experience}
