@@ -7,7 +7,8 @@ Resorting to holistic solutions like the above mentioned is especially useful fo
 
 In contrast to fully incorporated applications, some approaches in literature already shift focus towards surrounding aspects surrounding of traffic simulation, like focusing on the distributing simulation \cite{mastio2015towards}.
 
-As of \cite{mastio2015towards}, which depicts the simplest yet most fundamental approach to general network traversal, it utilizes a basic graph structure with vertices as intersection points and edges connecting these intersections. Agents are assigned a path over a fixed set of vertices as the shortest path over weighted edges. The travel time $t$ there depends on the number of agents currently on the edge in question. Calculating this $t$ can be done based on different kinds of functions modelling e.g. a certain free-flow capacity where for a given $n$ number of vehicles the weight ($t$) of an edge will not be impacted and only after reaching a certain threshold number $n_{\text{thresh}}$ the weight will increase to depict a slower movement (to a degree of $\alpha$) of traffic along said edge; like shown in \autoref{eq:edgeSpeed} - being a slightly modified version of the formulas used in \cite{mastio2015towards} and \cite{ksontini2016building}.
+As of \cite{mastio2015towards}, which depicts the simplest yet most fundamental approach to general network traversal, it utilizes a basic graph structure with vertices (also called "nodes") as intersection points and edges (also called "links") connecting these intersections. Agents are assigned a path over a fixed set of vertices as the shortest path over weighted edges. Path updates may occur only upon arrival at a given vertex when the agent then queries for a possible updated path.
+The travel time $t$ on an edge depends on the number of agents currently on the edge in question. Calculating this $t$ can be done based on different kinds of functions modelling e.g. a certain free-flow capacity where for a given $n$ number of vehicles the weight ($t$) of an edge will not be impacted and only after reaching a certain threshold number $n_{\text{thresh}}$ the weight will increase to depict a slower movement (to a degree of $\alpha$) of traffic along said edge; like shown in \autoref{eq:edgeSpeed} - being a slightly modified version of the formulas used in \cite{mastio2015towards} and \cite{ksontini2016building}.
 
 \begin{equation}\label{eq:edgeSpeed}
     t = 
@@ -24,9 +25,5 @@ As proposed by \cite{zargayouna2013agent}, agents adhere to a specific simulatio
 
 The visualization procedure of a given simulation then needs to adhere to the time lapse nature of the event logs, which not necessarily adheres well to standards defined by holistic framework solutions (like used in \cite{zargayouna2013agent}\cite{ksontini2016building}). As visualization is a side-aspect of most MAS-focused implementations (see \cite{mastio2015towards}), this is generally speaking seen as an added bonus for both debugging and reporting purposes.
 
-% CHECK if performance metrics util. like this
 Regarding performance metrics of a traffic simulation, metrics like use-of-transit, satisfaction and travelling-time are frequently proposed (\cite{brakewood2018literature}). With the use of dedicated car- and planner-agents (alongside \cite{zargayouna2013agent}) and the omittance of public transport time-table-based scheduling / availability-based carsharing, this leaves travelling-time as well as deviation from planning to execution performance as major indicators for performance.
-Enhancing this may be subjective monitoring of network behavior (\cite{brakewood2018literature}, \cite{zargayouna2013agent}).
-
-% TODO: NXT "agents traverse edges of a graph and possible update path when reaching vertices" in here?
-% TODO: NXT disclaimer of edge = link, vertex = node
+In addition to this, subjective monitoring of network behavior may enhance the result (\cite{brakewood2018literature}, \cite{zargayouna2013agent}).
