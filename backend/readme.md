@@ -29,6 +29,10 @@ sudo prosodyctl cert generate localhost
 ```
 sudo prosodyctl start
 ```
+8. Prosody can be stopped with the following command:
+```
+sudo prosodyctl stop
+```
 
 ## Creating Graphs
 Run:
