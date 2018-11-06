@@ -1,6 +1,7 @@
 let MAX_TICKS = 63,
     SVG = undefined;
-var simulation = undefined;
+var simulation = undefined,
+    analyzer = undefined;
  
 class Animation {
     constructor() {}
@@ -442,6 +443,9 @@ let runSimulation = function() {
         simulation.start();
 
         toastr.success(`Starting Simulation <${selectedSim}>`);
+        
+        analyzer = new Analyzer(retrievedLogs);
+        analyzer.start();
     }
 };
 let stopSimulation = function() {
