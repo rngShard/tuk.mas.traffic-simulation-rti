@@ -39,8 +39,12 @@ class Analyzer {
                 action = s[1].trim().toUpperCase();
             if (action === "SPAWN") {
                 carAgents[carAgentId] = {
-                    start: new Date(s[0].trim()).getTime()
+                    agentType: s[4].trim(),
+                    start: new Date(s[0].trim()).getTime(),
+                    actualRoute: []
                 };
+            } else if (action === "ENTER" || action === "REACH") {
+                carAgents[carAgentId]['actualRoute'].push(s[3].trim());
             } else if (action === "DESPAWN") {
                 carAgents[carAgentId]['end'] = new Date(s[0].trim()).getTime();
                 carAgents[carAgentId]['actualDuration'] = carAgents[carAgentId]['end'] - carAgents[carAgentId]['start'];
@@ -53,26 +57,41 @@ class Analyzer {
         }
     }
     _includePathing(cb) {
-        $.get('http://localhost:3000/api/graph', function(res) {
-            let graphxData = res.payload;
-            
-            for (let i = 0; i < this.plannerAgentLines.length; i++) {
-                let line = this.plannerAgentLines[i],
-                    s = line.split(';'),
-                    carAgentId = s[2].trim(),
-                    action = s[1].trim().toUpperCase();
-                if (action === "INIT") {
-                    // TODO: calc init time bsaed on graphs only (no traffic in play), calc init time based in traffic
-                } else if (action === "UPDATE") {
-                    // TODO: time on update
-                } else if (action === "REROUTE") {
-                    // TODO: time on reroute with reroute-marker (as completely new path)
-                }
+        // class Graph {
+        //     constructor(graphx) {
+        //         this.nodes = graphx.nodes;
+        //         this.links = graphx.links;
+        //     }
+        // }
+        
+        // $.get('http://localhost:3000/api/graph', function(res) {
+        //     let graphx = res.payload,
+        //         graph = new Graph(graphx);
 
-                if (i === this.plannerAgentLines.length - 1)
-                    cb();
+        for (let i = 0; i < this.plannerAgentLines.length; i++) {
+            let line = this.plannerAgentLines[i],
+                s = line.split(';'),
+                carAgentId = s[2].trim(),
+                action = s[1].trim().toUpperCase();
+            if (action === "INIT") {
+                let routeTimes = s[4].trim().split(',');
+                this.carAgents[carAgentId]['initRoute'] = s[3].trim().split(',');
+                this.carAgents[carAgentId]['initRouteTimes'] = routeTimes;
+                for (let sum=0, i=0; i < routeTimes.length; i++) {
+                    sum += parseInt(routeTimes[i]);
+                    if (i == routeTimes.length - 1)
+                        this.carAgents[carAgentId]['initTravelTime'] = sum;
+                }
+            // } else if (action === "UPDATE") {
+            //     // note: not inspected so far
+            // } else if (action === "REROUTE") {
+            //     // note: not inspected so far
             }
-        });
+
+            if (i === this.plannerAgentLines.length - 1)
+                cb();
+        }
+        // });
     }
 
 
