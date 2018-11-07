@@ -7,8 +7,7 @@ Please find this project's sub-modules in their respective folders:
 - NodeJS-based frontend simulator visualization application in `frontend/`
   - contains **instructions how to start web-bsaed UI**
 - Python MAS simulator in `backend/`
-  - contains **instructions how to start simulator** 
-  <!-- TODO make sure start-up instructions are provided for backend -->
+  - contains **instructions how to start simulator**
 - utilized data / logging files (generated from backend, util. in frontend) in `data/`
 - Latex project report in `report/`
 

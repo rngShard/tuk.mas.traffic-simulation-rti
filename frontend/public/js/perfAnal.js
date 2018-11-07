@@ -4,7 +4,8 @@ class Report {
         this.payload = {
             agentObjs: [],
             travelTimeObjs: [],
-            routeObjs: []
+            routeObjs: [],
+            summary: {}
         };
     }
 
@@ -15,7 +16,7 @@ class Report {
     analyse(cb) {
         let thiz = this;
         this._analyzeInternalInfo(function() {
-            thiz._combinatorialAnalysis(function() {
+            thiz._combAnal(function() {
                 cb();
             });
         });
@@ -51,8 +52,23 @@ class Report {
         }
     }
 
-    _combinatorialAnalysis(cb) {
-        cb();
+    _combAnal(cb) {
+        this.payload.summary['agentNum'] = this.payload.agentObjs.length;
+
+        let travelTimeSumDiscr = 0, 
+            travelTimesDiscrs = [];
+        for (let i = 0; i < this.payload.travelTimeObjs.length; i++) {
+            let discrepancy = this.payload.travelTimeObjs[i].travelTimeDiscrepancy;
+            travelTimeSumDiscr += discrepancy;
+            travelTimesDiscrs.push(discrepancy);
+            if (i === this.payload.travelTimeObjs.length - 1) {
+                this.payload.summary['travelTimeAvgDiscrepancy'] = travelTimeSumDiscr / this.payload.travelTimeObjs.length;
+                this.payload.summary['travelTimeDiscrepancies'] = travelTimesDiscrs.sort((a,b) => a - b);
+
+                // TODO: rerouting stats
+                cb();
+            }
+        }
     }
 }
 
