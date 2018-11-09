@@ -3,8 +3,10 @@ import random
 import json
 
 # CAPACITIES = [5, 7, 10, 12, 15, 15, 20, 20, 20, 25, 25, 25, 25, 25, 25, 25, 40, 40 ,40 ,40 ,40 , 50, 50 ,50   ]
-# CAPACITIES = [1,2,2,3,3,3,5,5,5]
-CAPACITIES = [1, 2, 3, 4, 5]
+CAPACITIES = [1, 2, 2, 3, 3, 3, 5, 5, 5]
+
+
+# CAPACITIES = [1, 2, 3, 4, 5]
 
 
 class GraphCreator:
@@ -19,7 +21,7 @@ class GraphCreator:
     def _init_distances(self):
         for u, v in self.graph.edges:
             self.graph[u][v]['distance'] = int(random.random() * 1000)
-            self.graph[u][v]['value'] = self.graph[u][v]["distance"]/100
+            self.graph[u][v]['value'] = self.graph[u][v]["distance"] / 100
 
     def _init_capacities(self):
         for u, v in self.graph.edges:
@@ -40,5 +42,5 @@ class GraphCreator:
 
 
 if __name__ == "__main__":
-    network = GraphCreator(10, 2)
+    network = GraphCreator(30, 3)
     network.save_graph("../data/graphs/test_graph.json")

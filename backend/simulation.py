@@ -1,10 +1,11 @@
 import time
-
+from random import choice
 from backend.event_agent import EventAgent
 from backend.supervisor_agent import SupervisorAgent
 from backend.traveller_agent import TravellerAgent
 
-NUM_AGENTS = 20
+NUM_AGENTS = 50
+AGENT_TYPES = ["local", "global"]
 
 if __name__ == "__main__":
 
@@ -14,7 +15,7 @@ if __name__ == "__main__":
     eventagent = EventAgent("eventmanager@localhost", "test")
     eventagent.start()
 
-    agents = [TravellerAgent(f"test{i}@localhost", "test", 1) for i in range(NUM_AGENTS)]
+    agents = [TravellerAgent(f"test{i}@localhost", "test", 1, choice(AGENT_TYPES)) for i in range(NUM_AGENTS)]
     print("Travellers loaded")
     for i in agents:
         i.start()

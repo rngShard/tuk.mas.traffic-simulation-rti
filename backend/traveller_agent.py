@@ -1,12 +1,12 @@
 import asyncio
-from random import choice
+
 from spade.agent import Agent
 from spade.behaviour import FSMBehaviour, State
 
-from backend.util import build_message, get_timestamp, load_graph
+from backend.traveller import Traveller
+from backend.util import build_message, get_timestamp
 
 SUPERVISOR_AGENT = "supervisor@localhost"
-GRAPH_PATH = "../data/graphs/test_graph.json"
 
 STATE_SPAWN = "STATE_SPAWN"
 STATE_GET_ROUTE = "STATE_GET_ROUTE"
@@ -16,66 +16,6 @@ STATE_DRIVE = "STATE_DRIVE"
 STATE_EDGE_END = "EDGE_END"
 STATE_ARRIVED = "STATE_ARRIVED"
 STATE_FINAL = "STATE_FINAL"
-
-
-class Traveller:
-
-    def __init__(self, num_routes, start_node=None, destination_node=None, max_speed=100, ):
-        self.num_routes = num_routes
-        self.route_count = 0
-        self.graph = load_graph(GRAPH_PATH)
-        self.init_state = True
-        self.max_speed = max_speed
-        self.current_speed = max_speed
-        self.travelled_edge_distance = 0
-        self.current_edge_distance = 0
-
-        if start_node is not None and destination_node is not None:
-            self.current_node = start_node
-            self.destination_node = destination_node
-        else:
-            self.current_node = self.choose_start_node()
-            self.destination_node = self.choose_destination_node()
-
-    def inc_route_count(self):
-        self.route_count += 1
-
-    def get_nodes(self):
-        return self.graph.nodes
-
-    def get_edges(self):
-        return self.graph.edges
-
-    def choose_start_node(self):
-        return choice(list(self.graph.nodes))
-
-    def choose_destination_node(self):
-        destination_node = self.current_node
-        while destination_node == self.current_node:
-            destination_node = choice(list(self.graph.nodes))
-        return destination_node
-
-    def get_next_node(self):
-        return self.next_node
-
-    def set_next_node(self, node):
-        self.next_node = node
-
-    def set_current_speed(self, speed):
-        self.current_speed = speed
-
-    def get_current_speed(self):
-        return self.current_speed
-
-    def get_current_edge_distance(self):
-        distance = self.graph.get_edge_data(self.current_node, self.get_next_node())["distance"]
-        return distance
-
-    def get_travel_time(self):
-        return self.get_current_edge_distance() / self.get_current_speed()
-
-    def drive(self):
-        self.travelled_edge_distance += self.current_speed
 
 
 class TravellerBehaviour(FSMBehaviour):
@@ -92,7 +32,8 @@ class TravellerBehaviour(FSMBehaviour):
 class StateSpawn(State):
     async def run(self):
         msg = build_message("inform", "spawn", self.agent.name,
-                            f"{get_timestamp()}|{self.agent.traveller.current_node}", SUPERVISOR_AGENT)
+                            f"{get_timestamp()}|{self.agent.traveller.current_node}|"
+                            f"{self.agent.traveller.agent_type}", SUPERVISOR_AGENT)
         await self.send(msg)
         await asyncio.sleep(0)
         self.set_next_state(STATE_GET_ROUTE)
@@ -100,11 +41,30 @@ class StateSpawn(State):
 
 class StateGetRoute(State):
     async def run(self):
-        msg = build_message("request", "get_route", self.agent.name,
-                            f"{self.agent.traveller.current_node}"
-                            f"|{self.agent.traveller.destination_node}|{self.agent.traveller.init_state}",
-                            SUPERVISOR_AGENT)
-        await self.send(msg)
+        if self.agent.traveller.agent_type == "global":
+            msg = build_message("request", "get_route", self.agent.name,
+                                f"{self.agent.traveller.current_node}"
+                                f"|{self.agent.traveller.destination_node}|{self.agent.traveller.init_state}",
+                                SUPERVISOR_AGENT)
+            await self.send(msg)
+        elif self.agent.traveller.agent_type == "local":
+
+            if self.agent.traveller.init_state:
+                msg = build_message("request", "get_speed", self.agent.name, f"{self.agent.traveller.current_node}"
+                                                                             f"|{self.agent.traveller.next_node}"
+                                                                             f"|{self.agent.traveller.init_state}"
+                                                                             f"|{self.agent.traveller.get_route_travel_times()}"
+                                                                             f"|{self.agent.traveller.route}",
+                                    SUPERVISOR_AGENT)
+            else:
+                msg = build_message("request", "get_speed", self.agent.name, f"{self.agent.traveller.current_node}"
+                                                                             f"|{self.agent.traveller.next_node}"
+                                                                             f"|{self.agent.traveller.init_state}"
+                                                                             f"|{self.agent.traveller.get_route_travel_times()}"
+                                                                             f"|{self.agent.traveller.route[self.agent.traveller.node_count-1:]}",
+                                    SUPERVISOR_AGENT)
+            await self.send(msg)
+
         self.agent.traveller.init_state = False
         await asyncio.sleep(0)
         self.set_next_state(STATE_RECEIVE_ROUTE)
@@ -112,22 +72,40 @@ class StateGetRoute(State):
 
 class StateReceiveRoute(State):
     async def run(self):
-        msg = await self.receive(timeout=10)
-        msg_body = msg.body.split("|")
-        next_node = int(msg_body[0])
-        speed = msg_body[1].split(".")[0]
-        speed = int(speed)
-        self.agent.traveller.set_next_node(next_node)
-        self.agent.traveller.set_current_speed(speed)
+        if self.agent.traveller.agent_type == "global":
+            msg = await self.receive(timeout=10)
+
+            msg_body = msg.body.split("|")
+            next_node = int(msg_body[0])
+            speed = msg_body[1].split(".")[0]
+            speed = int(speed)
+            self.agent.traveller.set_next_node(next_node)
+            self.agent.traveller.set_current_speed(speed)
+        elif self.agent.traveller.agent_type == "local":
+            msg = await self.receive(timeout=10)
+            speed = float(msg.body)
+            if self.agent.traveller.next_node == self.agent.traveller.destination_node:
+                self.agent.traveller.final_edge = True
+            else:
+                self.agent.traveller.final_edge = False
+            self.agent.traveller.set_current_speed(speed)
         await asyncio.sleep(0)
         self.set_next_state(STATE_EDGE_START)
 
 
 class StateEdgeStart(State):
     async def run(self):
-        msg = build_message("inform", "edge_start", self.agent.name,
-                            f"{get_timestamp()}|{self.agent.traveller.current_node}|"
-                            f"{self.agent.traveller.next_node}", SUPERVISOR_AGENT)
+        if self.agent.traveller.agent_type == "global":
+            msg = build_message("inform", "edge_start", self.agent.name,
+                                f"{get_timestamp()}|{self.agent.traveller.current_node}|"
+                                f"{self.agent.traveller.next_node}|"
+                                f"{self.agent.traveller.agent_type}", SUPERVISOR_AGENT)
+        elif self.agent.traveller.agent_type == "local":
+            msg = build_message("inform", "edge_start", self.agent.name,
+                                f"{get_timestamp()}|{self.agent.traveller.current_node}|"
+                                f"{self.agent.traveller.next_node}|"
+                                f"{self.agent.traveller.agent_type}|"
+                                f"{self.agent.traveller.get_estimated_travel_time()}", SUPERVISOR_AGENT)
         await self.send(msg)
         await asyncio.sleep(0)
         self.set_next_state(STATE_DRIVE)
@@ -150,8 +128,10 @@ class StateEdgeEnd(State):
                             f"{self.agent.traveller.next_node}", SUPERVISOR_AGENT)
         await self.send(msg)
         self.agent.traveller.current_node = self.agent.traveller.next_node
+        if not self.agent.traveller.final_edge:
+            self.agent.traveller.set_next_node()
         await asyncio.sleep(0)
-        if self.agent.traveller.current_node == self.agent.traveller.destination_node:
+        if self.agent.traveller.current_node == self.agent.traveller.destination_node or self.agent.traveller.final_edge:
             self.set_next_state(STATE_ARRIVED)
         else:
             self.set_next_state(STATE_GET_ROUTE)
@@ -164,9 +144,8 @@ class StateArrived(State):
                             SUPERVISOR_AGENT)
         print("arrived")
         await self.send(msg)
-
-        self.agent.traveller.inc_route_count()
         await asyncio.sleep(0)
+        self.agent.traveller.inc_route_count()
         if self.agent.traveller.route_count == self.agent.traveller.num_routes:
             self.set_next_state(STATE_FINAL)
         else:
@@ -181,9 +160,9 @@ class StateFinal(State):
 
 
 class TravellerAgent(Agent):
-    def __init__(self, host, pw, num_routes, start_node=None, destination_node=None, loop=None):
+    def __init__(self, host, pw, num_routes, agent_type="global", start_node=None, destination_node=None, loop=None):
         Agent.__init__(self, host, pw, loop=loop)
-        self.traveller = Traveller(num_routes, start_node, destination_node)
+        self.traveller = Traveller(num_routes, agent_type, start_node, destination_node)
 
     def setup(self):
         print("TravellerAgent started")

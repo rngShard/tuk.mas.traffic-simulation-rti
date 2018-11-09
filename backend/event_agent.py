@@ -13,7 +13,7 @@ class EventManager:
     def __init__(self):
         self.graph = load_graph(GRAPH_PATH)
         self.events = ["road_works_start", "road_works_start", "road_works_start", "road_works_start",
-                       "spawn_random_agents", "spawn_agents", "road_works_end"]
+                        "road_works_end"]
         self.event_factors = [round(i * 0.1, 2) for i in range(2, 10)]
         self.event_times = [i for i in range(3, 10)]
         self.num_agents = [i for i in range(1, 6)]
@@ -82,8 +82,10 @@ class EventAgent(Agent):
                     msg = build_message("inform", "event_road_works_end", self.agent.name,
                                         f"{ts}|{edge[0]}|{edge[1]}|1", SUPERVISOR_AGENT)
                     await self.send(msg)
+                    self.counter += 1
                 except KeyError:
                     pass
+
             if event == "spawn_random_agents":
                 num_agents = range(self.agent.event_manager.get_random_num_agents())
                 agents = []
@@ -118,6 +120,6 @@ class EventAgent(Agent):
     def setup(self):
         self.event_manager = EventManager()
         print(f"EventAgent started at {datetime.datetime.now().time()}")
-        start_at = datetime.datetime.now() + datetime.timedelta(seconds=5)
-        b = self.EventBehav(period=3, start_at=start_at)
+        start_at = datetime.datetime.now() + datetime.timedelta(seconds=3)
+        b = self.EventBehav(period=2, start_at=start_at)
         self.add_behaviour(b)

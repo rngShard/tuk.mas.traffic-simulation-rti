@@ -13,8 +13,8 @@ class CarLogger(Logger):
     def __init__(self):
         super().__init__()
 
-    def log_spawn(self, agent_id, ts, start_node):
-        log_line = f"{ts} ; SPAWN ; {agent_id} ; {start_node} ; LOCAL; "
+    def log_spawn(self, agent_id, ts, start_node, agent_type):
+        log_line = f"{ts} ; SPAWN ; {agent_id} ; {start_node} ; {agent_type}; "
         self.log.append(log_line)
 
     def log_enter(self, agent_id, ts, node_i, node_j, expected_travel_time, ):

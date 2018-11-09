@@ -61,7 +61,6 @@ class Supervisor:
 
     def get_route(self, current_node, destination_node):
         path = nx.shortest_path(self.graph, current_node, destination_node, "travel_time")
-        print(path)
         return path
 
     def get_speed(self, node_i, node_j):
@@ -146,21 +145,61 @@ class SupervisorAgent(Agent):
 
                     self.agent.supervisor.traveller_state_dict[agent_id] = [route, travel_times, int(current_node),
                                                                             int(next_node), int(speed)]
+                elif endpoint == "get_speed":
+                    msg_body = msg.body.split("|")
+                    current_node = msg_body[0]
+                    next_node = msg_body[1]
+                    init_state = msg_body[2]
+                    travel_times = msg_body[3][1:-1]
+                    if len(travel_times) > 0:
+                        travel_times = [i for i in travel_times.split(",")]
+                    travel_times = [float(i) * 1000 for i in travel_times]
+                    route = msg_body[4][1:-1]
+                    if len(route) > 1:
+                        route = [int(i) for i in route.split(",")]
+                    self.agent.supervisor.increment_density(int(current_node), int(next_node))
+                    self.agent.supervisor.update_travel_time(int(current_node), int(next_node))
+                    speed = self.agent.supervisor.get_speed(int(current_node), int(next_node))
+                    answer = build_message("inform", "get_speed", self.agent.name,
+                                           f"{speed}", to=to)
+                    await self.send(answer)
+                    if init_state == "True":
+                        self.agent.supervisor.planner_logger.log_plan("INIT", agent_id, get_timestamp(), route,
+                                                                      travel_times)
+                    else:
+                        old_travel_times = self.agent.supervisor.traveller_state_dict[agent_id][1].copy()
+                        old_travel_times.pop(0)
+                        if travel_times != old_travel_times:
+                            self.agent.supervisor.planner_logger.log_plan("UPDATE", agent_id, get_timestamp(), route,
+                                                                          travel_times)
+
+                    self.agent.supervisor.traveller_state_dict[agent_id] = [route, travel_times, int(current_node),
+                                                                            int(next_node), int(speed)]
+
                 elif endpoint == "spawn":
-                    print("SPAWN")
                     msg_body = msg.body.split("|")
                     ts = msg_body[0]
                     start_node = msg_body[1]
-                    self.agent.supervisor.car_logger.log_spawn(agent_id, ts, start_node)
+                    agent_type = msg_body[2]
+                    self.agent.supervisor.car_logger.log_spawn(agent_id, ts, start_node, agent_type)
 
                 elif endpoint == "edge_start":
                     msg_body = msg.body.split("|")
                     ts = msg_body[0]
                     current_node = msg_body[1]
                     next_node = msg_body[2]
-                    self.agent.supervisor.car_logger.log_enter(agent_id, ts, current_node, next_node,
-                                                               int(self.agent.supervisor.
-                                                                   get_travel_time(int(current_node), int(next_node))))
+                    agent_type = msg_body[3]
+                    print(agent_type)
+                    if agent_type == "global":
+                        self.agent.supervisor.car_logger.log_enter(agent_id, ts, current_node, next_node,
+                                                                   int(self.agent.supervisor.
+                                                                       get_travel_time(int(current_node),
+                                                                                       int(next_node))))
+                    elif agent_type == "local":
+                        travel_time = msg_body[4]
+                        self.agent.supervisor.car_logger.log_enter(agent_id, ts, current_node, next_node,
+                                                                   int(float(travel_time) * 1000))
+
                 elif endpoint == "edge_end":
                     msg_body = msg.body.split("|")
                     last_node = msg_body[0]
