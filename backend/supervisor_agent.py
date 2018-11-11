@@ -95,9 +95,9 @@ class SupervisorAgent(Agent):
 
         async def on_end(self):
             graph_name = GRAPH_PATH.split("/")[-1].split(".")[0]
-            self.agent.supervisor.car_logger.write_log(f"../data/sim_logs/000-{graph_name}-carAgents.log")
-            self.agent.supervisor.planner_logger.write_log(f"../data/sim_logs/000-{graph_name}-plannerAgent.log")
-            self.agent.supervisor.event_logger.write_log(f"../data/sim_logs/000-{graph_name}-events.log")
+            self.agent.supervisor.car_logger.write_log(graph_name, "carAgents")
+            self.agent.supervisor.planner_logger.write_log(graph_name, "plannerAgent")
+            self.agent.supervisor.event_logger.write_log(graph_name, "events")
 
         def on_subscribe(self, jid):
             print(f"Agent {jid} approved")
