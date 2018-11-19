@@ -1,11 +1,20 @@
 # MAS-Project: Traffic Simulation based on Real-Time Information
 
+This repository holds implementations for
+
+- Python MAS backend traffic simulation &
+- HTML/CSS/JS + NodeJS frontend traffic visualization
+
+as well as connected fundamental- and output data, together with Latex sources for the respective written report regarding "Traffic Simulation based on Real-Time Information".
+
+Project work conducted by _Konstantin Kloster_ & _Oliver Berg_ regarding project assignment of the lecture *Multi-Agent Systems* in summer term 2018 at University of Kaiserslautern (TU Kaiserslautern), Germany.
+
 ## Project Structure
 
 Please find this project's sub-modules in their respective folders:
 
 - NodeJS-based frontend simulator visualization application in `frontend/`
-  - contains **instructions how to start web-bsaed UI**
+  - contains **instructions how to start web-based UI**
 - Python MAS simulator in `backend/`
   - contains **instructions how to start simulator**
 - utilized data / logging files (generated from backend, util. in frontend) in `data/`
