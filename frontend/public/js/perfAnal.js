@@ -2,9 +2,10 @@ class Report {
     constructor(carAgents) {
         this.basicCarAgentInfo = carAgents;
         this.payload = {
-            agentObjs: [],
-            travelTimeObjs: [],
-            routeObjs: [],
+            internalInfo: {},
+            // agentObjs: [],
+            // travelTimeObjs: [],
+            // routeObjs: [],
             summary: {}
         };
     }
@@ -31,21 +32,28 @@ class Report {
         for (let i = 0; i < keyset.length; i++) {
             let key = keyset[i],
                 info = this.basicCarAgentInfo[key];
-            let agentObj = {
-                id: key,
-                type: info.agentType
-            }, travelTimeObj = {
+            // let agentObj = {
+            //     id: key,
+            //     type: info.agentType
+            // }, 
+            let travelTimeObj = {
                 initTravelTime: info.initTravelTime,
                 actualTravelTime: info.actualTravelTime,
                 travelTimeDiscrepancy: info.actualTravelTime - info.initTravelTime
             }, routeObj = {
                 initRoute: info.initRoute,
-                actualRoute: info.actualRoute,
-                rerouted: info.rerouted
+                actualRoute: info.actualRoute
             };
-            this.payload.agentObjs.push(agentObj);
-            this.payload.travelTimeObjs.push(travelTimeObj);
-            this.payload.routeObjs.push(routeObj);
+            this.payload.internalInfo[key] = {
+                id: key,
+                type: info.agentType,
+                travelTime: travelTimeObj,
+                route: routeObj,
+                rerouted: info.rerouted
+            }
+            // this.payload.agentObjs.push(agentObj);
+            // this.payload.travelTimeObjs.push(travelTimeObj);
+            // this.payload.routeObjs.push(routeObj);
 
             if (i === keyset.length - 1)
                 cb();
@@ -53,17 +61,23 @@ class Report {
     }
 
     _combAnal(cb) {
-        this.payload.summary['agentNum'] = this.payload.agentObjs.length;
+        // console.log(this.payload);
 
         let travelTimeSumDiscr = 0, 
             travelTimesDiscrs = [];
-        for (let i = 0; i < this.payload.travelTimeObjs.length; i++) {
-            let discrepancy = this.payload.travelTimeObjs[i].travelTimeDiscrepancy;
+        let keyset = Object.keys(this.payload.internalInfo),
+            numAgents = keyset.length;
+        for (let i = 0; i < numAgents; i++) {
+            let info = this.payload.internalInfo[keyset[i]];
+
+            let discrepancy = info.travelTime.travelTimeDiscrepancy;
             travelTimeSumDiscr += discrepancy;
             travelTimesDiscrs.push(discrepancy);
-            if (i === this.payload.travelTimeObjs.length - 1) {
-                this.payload.summary['travelTimeAvgDiscrepancy'] = travelTimeSumDiscr / this.payload.travelTimeObjs.length;
-                this.payload.summary['travelTimeDiscrepancies'] = travelTimesDiscrs.sort((a,b) => a - b);
+
+            if (i === numAgents - 1) {
+                this.payload.summary['agentNum'] = numAgents;
+                this.payload.summary['travelTimeAvgDiscrepancy'] = travelTimeSumDiscr / numAgents;
+                this.payload.summary['travelTimeDiscrepancies'] = travelTimesDiscrs.sort((a,b) => b - a);
 
                 // TODO: rerouting stats
                 cb();
