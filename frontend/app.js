@@ -23,10 +23,20 @@ app.use('/libs', express.static(path.join(__dirname, 'node_modules')));
 
 var config = require('./config/config');    // place config file, being ignored via gitignore
 
-var dataAccess = require('./model/dataAccess')(config);
+/* Model */
 
-app.use('/', require('./routes/index')());
-app.use('/api/', require('./controller/api')(dataAccess));
+// var dataAccess = require('./model/mongoConnection')(config);   // No DB access needed
+var masSimulatorConnection = require('./model/masSimulatorConnection')();
+
+/* View */
+
+app.use('/', require('./routes/index')(masSimulatorConnection));
+
+/* Controller */
+
+app.use('/api/', require('./controller/api')(masSimulatorConnection));
+
+/* misc */
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

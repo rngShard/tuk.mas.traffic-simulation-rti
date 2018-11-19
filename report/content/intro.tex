@@ -1,0 +1,20 @@
+\section{Introduction}
+
+Traditionally, real-time information (RTI) was used by transit providers for operation and control.
+In today's age of always-on telecommunication devices and sensor input of an armada of connected input devices through the "Internet of Things" (IoT) movement, this information is also increasingly utilized by travellers themselves for route planning. This includes car routes as well as coordinating public transport timetables or available ride-sharing resources.
+
+In this work, we will simulate, display and analyze the dynamic movement and interaction of travelling \& planning agents within a traffic coordination setting.
+
+To this end, a multi-agent system (MAS) is implemented which takes formal network graphs and specific user input regarding the simulation scale to then simulate a continuously spawning group of car-agents traversing the network with the goal to arrive at an assigned location as fast as possible.
+An internal coordination unit in the form of a planner-agent distributes route information according to the type of agent it is being queried from.
+The architecture setup is based on propositions from provided sources (\cite{mastio2015towards}, \cite{brakewood2018literature}).
+Random events altering the state of the network take place to simulate traffic incidents and to provoke agents to deviate from initial plans.
+
+Having run the simulation and persisted the simulation run in respective log-files, a web-based frontend implementation reads network- and log-files to visualize the network graph and temporal agent-behavior. The visualization allows for selection of graph and run-data and displays the read and interpreted data.
+This should allow the observer to understand the car-agent's behavior and make numeric analysis results more visually interpretable.
+
+This report is structured as follows:
+Following this introductory description of context and task, \autoref{sec:relatedWork} will inspect related work surrounding the field of RTI traffic simulation and derived research and system implementation propositions.
+These are then being put into application context in \autoref{sec:backend} where the implemented MAS and respective architectural constraints are outlined.
+Next, \autoref{sec:frontend} continues to describe the frontend visualization and transitions into the traffic performance analysis in form of agent arrival-time metrics being is read from persisted system logs and put into perspective within this report's \autoref{sec:performanceAnalysis}.
+Finally, \autoref{sec:conclusion} presents the findings and concludes this project's report.

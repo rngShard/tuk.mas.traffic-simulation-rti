@@ -1,0 +1,126 @@
+\section{Web-based Simulation Frontend}\label{sec:frontend}
+
+Following the in \autoref{sec:backend} described MAS architecture, this section now presents the web-based frontend application visualizing a simulation run based on the persisted simulation run logging information and other provided miscellaneous resources. 
+
+
+\subsection{Persisted Logging Information}
+
+The frontend application reads graphs from json-files as well as a corpus of simulation-run logging files.
+
+
+\subsubsection{Graphs}\label{subsubsec:graphs}
+
+The network graph json-files are generated via the Python framework GraphX and then stored as json-files in the project folder. These are then being read from the MAS backend as well as the frontend-application. The file format can be seen in the example of figure below.
+
+\begin{figure}[thp]
+    \centering
+    \lstset{language=json, frame=single, linewidth=11cm}
+    \begin{tabular}{c}
+        \begin{lstlisting}
+{
+    "directed": false,
+    "graph": {
+        "name": "A Testing Graph"
+    },
+    "links": [
+        {"source": 0, "target": 1, "value":1},
+        {"source": 1, "target": 0, "value":2}
+    ],
+    "multigraph": false,
+    "nodes": [
+        {"id": 0, "color": "purple", "size": 16},
+        {"id": 1, "color": "green", "size": 9}
+    ]
+}
+        \end{lstlisting}
+    \end{tabular}
+    \caption{Example of GraphX output format (JSON)}
+    \label{fig:graphx}
+\end{figure}
+
+These graphs are being read form disc and parsed into program structures (backend) or exposed to an API (frontend, see \autoref{subsec:frontendArchitecture}).
+
+They do however only depict the formal structure of the graph, which is all the backend needs to simulate agent paths. For a proper visualization of the graph on the 2D image plane, the web-frontend additionally utilizes some formal graph-drawing algorithms (see \autoref{subsec:d3}).
+
+
+\subsubsection{Simulation-Logs}
+
+The simulation logs are the actual output of the traffic simulator and come on a collection of multiple associated logs: 
+
+\begin{itemize}
+    \item \textit{[id]-[graphId]-carAgents.log}
+    \item \textit{[id]-[graphId]-plannerAgent.log}
+    \item \textit{[id]-[graphId]-events.log}
+\end{itemize}
+
+Each log is named by a unique id which is unique only across multiple sets of different logs but coherent across all associated logs. This allows to map each carAgents-log to its respective event-log and plannerAgent-log.
+The graph-id is specified for each set of associated logs in order to map the utilized graph to the logs. Logs of a respective simulation run can only be visualized for the specified graph it was run on.
+
+Each log-file has lines for any event occurring at a specified point in time (indicated with the line's initial timestamp-value) and multiple values separated with semicolons.
+
+The \textbf{carAgents-log} holds lines structured with values of: \textit{timestamp} (ts), \textit{action} ("spawn" / "enter" / "reach" / "despawn"), \textit{agentID} and depending on the action some more attributes. It as such depicts the events thrown by car-agents and logged to reason about their timely execution.
+Action-type "spawn" gets additional attributes \textit{spawnNode} and \textit{agentType} to specify where and which kind of (car-)agent was spawned. 
+Action-type "enter" gets additional attributes \textit{linkEdgeFrom}, \textit{linkEdgeTo} and \textit{linkValue} to specify which edge the agent entered and at which speed he will traverse the link.
+Action-type "reach" gets the additional attribute \textit{node} to declare which (final) node the agent has just reached.
+Action-type "despawn" finally does not get additional attributes as this action only indicates to remove the agent from all later considerations.
+
+The \textbf{plannerAgent-log} holds lines structured with values of: \textit{timestamp} (ts), \textit{action} ("init" / "update" / "reroute"), \textit{agentId}, \textit{routeNodes} and \textit{routeLinkValues}, where the both "routeNodes" and "routeLinkValues" are lists of ids / numbers respectively indicating graph edges and edge weights of paths. As such this log captures the path planning done by the planner-agent for car-agents on initialization, updating of path link weights when reaching vertices or rerouting with new vertices and edges all together.
+
+The \textbf{events-log} holds lines structured with values of: \textit{timestamp} (ts), \textit{listOfEdges} and \textit{factor}, where the "listOfEdges" presents a list of nodes that identify links between them to be impacted in their weight / speed by the provided "factor".
+As such, the events viable for the application include all types of events that impact a given set of linked concerning travelling speed. This type of event was identified as being the most general one whilst having a major impact in route planning and provides intuitive real-world counterparts (e.g. break-down of a node slows down all traffic to that node, break down in a rode is a single link being impacted, new road means a single link becomes faster to use).
+
+
+\subsection{Frontend Architecture}\label{subsec:frontendArchitecture}
+
+The overall frontend application's architecture is based on a traditional Model-View-Controller setup implemented in NodeJS. The webserver is setup to listen to port 3000 and receive http requests to then respond with the corresponding page content.
+
+Internally, an API plays the role of the controller-component connecting the view-layer to the model. This interface is being utilized primarily to expose local file data to the end-user via a unified interface, preemptively resolving possible difficulties connecting the frontend application to the backend result or later adding further functionality based on said data. It is used to return json-formated data on graphs, logs and other miscellaneous internal status information.
+
+The API primarily talks to the \textit{masSimulatorConnection} which reads, formats and persists logging and graph information as it is being setup in the web-UI.
+Please note that as such the web-page is not quite capable to handle multi-user when being deployed, but rather a single user entity.
+
+Through the dedicated intermediate API layer, access control for resources as requested by the end-user application would be both possible and straight -forward to implement later on if needed.
+
+
+\subsection{User Interface Experience}
+
+The exposed User Interface depicts a web-page written in plain HTML5, CSS3 and JavaScript with the help of common libraries such as \textit{jQuery} and \textit{Bootstrap} for simple best-practice setup in addition to \textit{toastr} for notifications (see \autoref{fig:web-ui-init}).
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/web-ui-init.png}
+    \caption{Web-UI upon initial loading of the page}
+    \label{fig:web-ui-init}
+\end{figure}
+
+For canvas-based visualization and especially animation, the visualization library \textit{D3.js} was utilized (more on that in \autoref{subsec:d3}).
+
+The navigation flow adheres to basic top-to-bottom / left-to-right principle: The network graph is displayed in the canvas to the upper left, from which the selections take place to its right via selection panels for graph and simulation run. Controls regarding run visualization are positioned directly under the run selection with appropriate colors for starting and stopping. General non-intrusive display options (turning on Node-ID / Link-ID displays) are presented in more neutral blue color and positioned below the other primary controls.
+
+Below the basic visualization panel, textareas are used to display retrieved current-run logs (conforming to the conventions established in \autoref{subsubsec:graphs}). These serve the purpose to more intuitively display the information available from the simulation for visualization, as well as give instant feedback to selections made regarding the simulation run. Selections made regarding graph network immediately prompt a redrawing of the new network. All selections and button presses yield immediate visual feedback (via onchange-events).
+
+To ease the usage of the frontend navigation elements, they are en-/disabled based on the state of the application. As such, only simulation runs belonging to the currently active (drawn) graph are enabled for selection in the second select, the run-button only gets enabled with a drawn graph and selected run and the stop-button is disabled as long as no simulation is running.
+
+
+\subsection{Web-based Animations with D3}\label{subsec:d3}
+
+The underlying animation and visual display of graph elements are being done via the visualization library \textit{D3.js} \cite{bostock2012d3}.
+Generally speaking, it is based on the assumption that instead of separate independent graphical operations, D3 takes arrays of objects and manipulates (svg-) objects based on this set of provided data-points. Through procedure, the visualization of an array of vertices and edges becomes much more intuitive as well as computationally feasible.
+
+In \autoref{fig:web-ui-running}, you see a running simulation visualization as it is being projected on the drawn network graph.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/web-ui-running.png}
+    \caption{Web-UI with running visualization}
+    \label{fig:web-ui-running}
+\end{figure}
+
+The graph-drawing utilizes D3's dynamic visualization procedure to create a force-directed layout of the theoretical network description. Throughout D3's iteration, fixed positional and directional values are being applied, making the drawing process - though being dynamic - a deterministic process, thus drawing the same graph visualization of a given graph every time it is being called upon to be drawn on the canvases 2D plane.
+Animations are created by transform-operations on svg-elements on the canvases.
+
+Regarding concrete visualization of simulation-run events:
+Agents are drawn as circles of similar shape compared to nodes (as they are initially spawned on top of nodes of the network, thus maintaining similarity is intuitive) with borders indicating the type of (car-)agent displayed ("local" / "semi-local" / "global") and body colors ranging in the randomly interpolated blue spectrum.
+Upon path-scheduling by the planner-agent, the nodes of the identified path are briefly highlighted (increased in shape) in the same color as the agent the path was identified for. Updating paths only based on new link-values without rerouting does not prompt a visual feedback, while rerouting actions prompt similar highlighting as done uponm initialization, but in the respectively interpolated green color spectrum for all nodes included in the new path.
+
+The overall setup of animations is timestamp-based, as the globally initial (smallest) timestep in the car-agents-log is identified and set as \textit{time-0}, to then set timeouts for all other log entries based on the difference in timestamp values to this zero-time.

@@ -1,0 +1,27 @@
+{
+  "name": "express-example",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "DEBUG=App nodemon ./bin/www",
+    "stop": "pkill --signal SIGINT procTitle"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "bootstrap": "latest",
+    "cookie-parser": "^1.4.3",
+    "d3": "^5.7.0",
+    "debug": "^3.1.0",
+    "express": "^4.16.2",
+    "jade-bootstrap": "^1.0.14",
+    "jquery": "^3.3.1",
+    "mongodb": "^2.2.33",
+    "morgan": "^1.7.0",
+    "pg": "^6.1.0",
+    "popper.js": "latest",
+    "promise": "^8.0.1",
+    "pug": "^2.0.0-rc.4",
+    "serve-favicon": "^2.5.0",
+    "toastr": "^2.1.4"
+  }
+}

@@ -1,0 +1,104 @@
+\documentclass[10pt, oneside]{article}
+
+\usepackage{geometry}
+\geometry{a4paper}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{authblk}
+\usepackage{multicol}
+\usepackage{rotating}
+\usepackage{capt-of}
+\usepackage{hyperref}	%autoref
+\usepackage{amsmath}	%equation*
+\usepackage{array}
+\newenvironment{Figure}
+    {\par\medskip\noindent\minipage{\linewidth}}
+    {\endminipage\par\medskip}
+
+\usepackage{lipsum}
+\usepackage{parskip}    % spacing between paragraphs instead of indention  
+\usepackage{listings}
+\usepackage{xcolor}
+
+\colorlet{punct}{red!60!black}
+\definecolor{background}{HTML}{EEEEEE}
+\definecolor{delim}{RGB}{20,105,176}
+\colorlet{numb}{magenta!60!black}
+
+\lstdefinelanguage{json}{
+    basicstyle=\normalfont\ttfamily,
+    numbers=left,
+    numberstyle=\scriptsize,
+    stepnumber=1,
+    numbersep=8pt,
+    showstringspaces=false,
+    breaklines=true,
+    frame=lines,
+    backgroundcolor=\color{background},
+    literate=
+     *{0}{{{\color{numb}0}}}{1}
+      {1}{{{\color{numb}1}}}{1}
+      {2}{{{\color{numb}2}}}{1}
+      {3}{{{\color{numb}3}}}{1}
+      {4}{{{\color{numb}4}}}{1}
+      {5}{{{\color{numb}5}}}{1}
+      {6}{{{\color{numb}6}}}{1}
+      {7}{{{\color{numb}7}}}{1}
+      {8}{{{\color{numb}8}}}{1}
+      {9}{{{\color{numb}9}}}{1}
+      {:}{{{\color{punct}{:}}}}{1}
+      {,}{{{\color{punct}{,}}}}{1}
+      {\{}{{{\color{delim}{\{}}}}{1}
+      {\}}{{{\color{delim}{\}}}}}{1}
+      {[}{{{\color{delim}{[}}}}{1}
+      {]}{{{\color{delim}{]}}}}{1},
+}
+
+
+
+\title{Multi-agent Systems Project Report: \\
+    Traffic Simulation based on Real-Time Information}
+
+\author[]{Konstantin Kloster}
+\author[]{Oliver Berg}
+\affil[1]{Technical University Kaiserslautern}
+
+\date{\today}
+
+
+\begin{document}
+\maketitle
+
+% \begin{multicols}{2}
+
+
+\begin{abstract}
+    TODO write abstract
+\end{abstract}
+
+\setcounter{tocdepth}{2}
+\tableofcontents
+
+\newpage
+\input{content/intro.tex}       % paraphrasing task description, foreshadowing setup + analysis, explaining sections
+\newpage
+\input{content/relatedWork.tex}     % go through provided sources (4) as well as (generally) connected material
+\newpage
+\input{content/backend.tex}     % Python MAS setup, graph-type, agent-type, communication setup
+\newpage
+\input{content/frontend.tex}    % File-reading (graphs, logs), NodeJS architecture, D3, graph-drawing, UI
+\newpage
+\input{content/performanceAnalysis.tex}     % performance metrics (planning- / arrival time), subjective inspection (viability) via frontend (?)
+\newpage
+\input{content/conclusion.tex}      % performances, MAS setup, traffic agent types (prob. of schedules), network visualization
+
+
+% \end{multicols}
+
+\newpage
+
+\bibliography{lit}
+\bibliographystyle{apalike}
+
+\end{document} 

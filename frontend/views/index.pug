@@ -1,0 +1,35 @@
+extends layout
+
+block content
+	.container
+		h1 Simulated Traffic Network Visualization
+		.row
+			.col-md-10
+				#chart
+			.col-md-2
+				.form-group
+					label(for='activeGraph') Active Graph
+					select.form-control#activeGraph(onchange='updateGraph();')
+						for title, i in graphTitles
+							option= title
+					label(for='simulationRun') Simulation Run
+					select.form-control#simulationRun(onchange='loadLogs();')
+						option None
+						for logInfo in logInfos
+							option(data-graph=logInfo.graphName)= logInfo.id
+					.sim-controls(style='text-align:center; margin-top:1em;')
+						button.btn.btn-success#btnRun(onclick='runSimulation();' disabled) Run
+						button.btn.btn-danger#btnStop(onclick='stopSimulation();' disabled) Stop
+					.sim-controls(style='text-align:center; margin-top:2em;')
+						button.btn.btn-info(onclick=`$('circle[data-toggle="tooltip"]').tooltip('toggle');`) Toggle Node Values
+						button.btn.btn-info(onclick=`$('line[data-toggle="tooltip"]').tooltip('toggle');`) Toggle Link Values
+		.row
+			each logType in ['carAgentsDOTlog', 'plannerAgentDOTlog', 'eventsDOTlog']
+				.col-md-4.form-group
+					label(for=logType)
+						i= logType.replace('DOT', '.')
+					textarea(id=logType disabled)
+
+	script(src='libs/d3/dist/d3.min.js')
+	script(src='js/graph.js')
+	script(src='js/perfAnal.js')
