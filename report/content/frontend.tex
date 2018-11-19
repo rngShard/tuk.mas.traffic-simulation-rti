@@ -59,7 +59,7 @@ Each log-file has lines for any event occurring at a specified point in time (in
 The \textbf{carAgents-log} holds lines structured with values of: \textit{timestamp} (ts), \textit{action} ("spawn" / "enter" / "reach" / "despawn"), \textit{agentID} and depending on the action some more attributes. It as such depicts the events thrown by car-agents and logged to reason about their timely execution.
 Action-type "spawn" gets additional attributes \textit{spawnNode} and \textit{agentType} to specify where and which kind of (car-)agent was spawned. 
 Action-type "enter" gets additional attributes \textit{linkEdgeFrom}, \textit{linkEdgeTo} and \textit{linkValue} to specify which edge the agent entered and at which speed he will traverse the link.
-Action-type "reach" gets the additional attribute \textit{node} to declare which node the agent has just reached.
+Action-type "reach" gets the additional attribute \textit{node} to declare which (final) node the agent has just reached.
 Action-type "despawn" finally does not get additional attributes as this action only indicates to remove the agent from all later considerations.
 
 The \textbf{plannerAgent-log} holds lines structured with values of: \textit{timestamp} (ts), \textit{action} ("init" / "update" / "reroute"), \textit{agentId}, \textit{routeNodes} and \textit{routeLinkValues}, where the both "routeNodes" and "routeLinkValues" are lists of ids / numbers respectively indicating graph edges and edge weights of paths. As such this log captures the path planning done by the planner-agent for car-agents on initialization, updating of path link weights when reaching vertices or rerouting with new vertices and edges all together.
