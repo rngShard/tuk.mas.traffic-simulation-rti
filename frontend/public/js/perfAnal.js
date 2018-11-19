@@ -49,7 +49,7 @@ class Report {
                 type: info.agentType,
                 travelTime: travelTimeObj,
                 route: routeObj,
-                rerouted: info.rerouted
+                numRerouted: info.numRerouted
             }
             // this.payload.agentObjs.push(agentObj);
             // this.payload.travelTimeObjs.push(travelTimeObj);
@@ -61,10 +61,17 @@ class Report {
     }
 
     _combAnal(cb) {
-        // console.log(this.payload);
-
         let travelTimeSumDiscr = 0, 
             travelTimesDiscrs = [];
+            let localTimeDiscr = 0,
+                cLocal = 0,
+                travelTimesDiscrsLocal = [],
+                globalTimeDiscr = 0,
+                travelTimesDiscrsGlobal = [],
+                cGlobal = 0;
+        let numReroutedAtAll = 0,
+            reroutes = [];
+        
         let keyset = Object.keys(this.payload.internalInfo),
             numAgents = keyset.length;
         for (let i = 0; i < numAgents; i++) {
@@ -73,13 +80,36 @@ class Report {
             let discrepancy = info.travelTime.travelTimeDiscrepancy;
             travelTimeSumDiscr += discrepancy;
             travelTimesDiscrs.push(discrepancy);
+            
+            if (info.numRerouted > 0)
+            numReroutedAtAll += 1;
+            reroutes.push(info.numRerouted);
+
+            if (info.type === 'local') {
+                localTimeDiscr += info.travelTime.travelTimeDiscrepancy;
+                travelTimesDiscrsLocal.push(info.travelTime.travelTimeDiscrepancy);
+                cLocal += 1;
+            } else if (info.type === 'global') {
+                globalTimeDiscr += info.travelTime.travelTimeDiscrepancy;
+                travelTimesDiscrsGlobal.push(info.travelTime.travelTimeDiscrepancy);
+                cGlobal += 1;
+            }
 
             if (i === numAgents - 1) {
-                this.payload.summary['agentNum'] = numAgents;
-                this.payload.summary['travelTimeAvgDiscrepancy'] = travelTimeSumDiscr / numAgents;
-                this.payload.summary['travelTimeDiscrepancies'] = travelTimesDiscrs.sort((a,b) => b - a);
-
-                // TODO: rerouting stats
+                this.payload.summary = {
+                    agentNum: numAgents,
+                    agentNumLocal: cLocal,
+                    agentNumGlobal: cGlobal,
+                    travelTimeAvgDiscrepancy: travelTimeSumDiscr / numAgents,
+                    travelTimeDiscrepancyLocal: localTimeDiscr / cLocal,
+                    travelTimeDiscrepancyGlobal: globalTimeDiscr / cGlobal,
+                    travelTimeDiscrepancies: travelTimesDiscrs,   // = travelTimesDiscrs.sort((a,b) => b - a);
+                    travelTimeDiscrepanciesLocal: travelTimesDiscrsLocal,
+                    travelTimeDiscrepanciesGlobal: travelTimesDiscrsGlobal,
+                    howManyReroutedAtAll: numReroutedAtAll,
+                    reroutes: reroutes
+                };
+                
                 cb();
             }
         }
