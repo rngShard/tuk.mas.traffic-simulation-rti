@@ -61,14 +61,16 @@ class Report {
     }
 
     _combAnal(cb) {
-        let travelTimeSumDiscr = 0, 
+        let travelTimeSum = 0,
+            travelTimes = [];
+        let travelTimeSumDiscr = 0,
             travelTimesDiscrs = [];
-            let localTimeDiscr = 0,
-                cLocal = 0,
-                travelTimesDiscrsLocal = [],
-                globalTimeDiscr = 0,
-                travelTimesDiscrsGlobal = [],
-                cGlobal = 0;
+        let localTimeDiscr = 0,
+            cLocal = 0,
+            travelTimesDiscrsLocal = [],
+            globalTimeDiscr = 0,
+            travelTimesDiscrsGlobal = [],
+            cGlobal = 0;
         let numReroutedAtAll = 0,
             reroutes = [];
         
@@ -76,6 +78,10 @@ class Report {
             numAgents = keyset.length;
         for (let i = 0; i < numAgents; i++) {
             let info = this.payload.internalInfo[keyset[i]];
+
+            let travelTime = info.travelTime.actualTravelTime;
+            travelTimeSum += travelTime;
+            travelTimes.push(travelTime);
 
             let discrepancy = info.travelTime.travelTimeDiscrepancy;
             travelTimeSumDiscr += discrepancy;
@@ -100,6 +106,8 @@ class Report {
                     agentNum: numAgents,
                     agentNumLocal: cLocal,
                     agentNumGlobal: cGlobal,
+                    travelTimeAvg: travelTimeSum / numAgents,
+                    travelTimes: travelTimes,
                     travelTimeAvgDiscrepancy: travelTimeSumDiscr / numAgents,
                     travelTimeDiscrepancyLocal: localTimeDiscr / cLocal,
                     travelTimeDiscrepancyGlobal: globalTimeDiscr / cGlobal,

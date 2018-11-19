@@ -21,10 +21,16 @@ The above depicted measures are calculated through a JavaScript-object being ini
 
 \subsection{Performance Results}
 
-% TODO: performance results
+Beginning the project implementation, our hypothesis was that global car-agents - having access to information regarding all exact current edge-weights - would perform superior to local car-agents as they rely on solely local intrinsic information that does not capture the global network state. We did however expect that even local car-agents perform comparably well (discrepancies of not-too-high double-digit percentages), depending on the number of spawned travelling agents and intensity of network events.  
 
-- Hypothesis
+The primary test-simulation revolves around strictly local and strictly global car-agents.
+A total of 50 car-agents are spawned (18 of type global, 32 of type local) and a number of network events occur regularly every few (approx. 2) seconds. \\
+The overall average travelling time discrepancy between expected and actual travelling time was 0.62748 seconds with an average travelling time of 5.43866 seconds.
+In comparison, the average travelling time discrepancy for local car-agents was 0.86022 seconds, while for global car-agents average discrepancy was only 0.21372 seconds.
+Local car-agents had discrepancies of 0.025 - 6.612 seconds, with 8 out of 32 local car-agents arriving more than a full seconds later than expected and only 2 more arriving more than 0.1 seconds late.
+Global car-agents had a discrepancy of 0.017 - 2.649 seconds, with 1 out of 18 global car-agents arriving more than a full seconds later than expected and 1 more arriving more than 0.1 seconds late.
+No rerouting occurred for the rerouting-capable global car-agents. 
 
-- Numbers
-
-- Findings
+With $1/9$ global car-agents arriving more than 100 ms late, global car-agent performance was said to be excellent. The single outlier global car-agent with high discrepancy in travelling time was to heavy changes in the network and unfortunate positioning of the agent; this is however a very possible situation in real-world traffic and as such still a nice finding in the simulation. \\
+With $1/4$ local car-agents arriving more than 100 ms late, performance of local car-agents is certainly worse than in case of global car-agents. They still (subjectively) traverse the network "well-enough", as they frequently arrive close or precisely on-time as well. \\
+No possible rerouting of global car-agents is an indication of mostly-consistent network state, which was an intentional decision as more complex influences to the network would not allow a quite feasible visualization. For performance analysis, this statistic is not necessarily mandatory and the initial hypothesis is still inspected and validated nicely.
