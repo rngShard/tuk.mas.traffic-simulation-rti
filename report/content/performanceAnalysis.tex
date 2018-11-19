@@ -1,3 +1,30 @@
 \section{Agent Performance Analysis}\label{sec:performanceAnalysis}
 
-TODO write performanceAnalysis-section
+Having presented MAS backend traffic simulation and frontend visualization procedures in \autoref{sec:backend} and \autoref{sec:frontend} respectively, we now add evaluation procedure and its implementation as well as resulting performance metrics.
+
+
+\subsection{Evaluation Procedure}
+
+There are different types of agents (of \textit{local} or \textit{global} nature) with randomly engaged origin and destination nodes as well as random events influencing the state of the network. Agents move along edges and thus reduce the speed of other agents proceeding to traverse said edge.
+
+With ouputs of the underlying simulation on carAgents-, planner- and events-log together with the graph-file, all performance metrics can be retrieved from these information:
+\begin{itemize}
+    \item The planner-log allows to compute \textbf{expected travelling time} from the initiated path for an agent with the weights of the edges as depicted in the graph-file
+    \item From 'spawn'- and 'reach'-events in the carAgents-log, the \textbf{actual travelling time} can be computed. Note that the actual travelling time may never be larger than the expected travelling time, as events in the network never speed-up edge traversal and traversal time gets impacted only negatively by other car-agents.
+    \item Subtracting expected from actual travelling time yields the agent's \textbf{travelling time discrapency}, which depicts one of the major performance number
+    \item Also note that the carAgent-log's 'spawn'-event holds information regarding the \textbf{type of car-agent} spawned. Travelling time information is persisted and compared with regards to the respective car-agent type as well.
+    \item The number of reroutes for car-agents of type 'global' shall also be considered. 
+\end{itemize}
+
+The above depicted measures are calculated through a JavaScript-object being initialized upon start of the simulation. Though this process is not necessarily simulation-dependent, having all information ready and extracted for the purpose of simulating it makes access and reorganization of said information easier. The performance summary is not persisted to storage but rather displayed in the browser console window for simplicity reasons, but a proper storing of the summary to a json-file would certainly be a future enhancement. 
+
+
+\subsection{Performance Results}
+
+% TODO: performance results
+
+- Hypothesis
+
+- Numbers
+
+- Findings
