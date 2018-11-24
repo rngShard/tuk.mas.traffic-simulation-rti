@@ -2,18 +2,16 @@ from random import choice
 
 import networkx as nx
 
-from backend.util import load_graph
-
-GRAPH_PATH = "../data/graphs/test_graph.json"
+from util import load_graph
 
 
 class Traveller:
 
-    def __init__(self, num_routes, agent_type, start_node=None, destination_node=None, max_speed=100, ):
+    def __init__(self, network, num_routes, agent_type, start_node=None, destination_node=None, max_speed=100, ):
         self.num_routes = num_routes
         self.route_count = 0
         self.agent_type = agent_type
-        self.graph = load_graph(GRAPH_PATH)
+        self.graph = load_graph(network)
         self.init_state = True
         self.max_speed = max_speed
         self.current_speed = max_speed
@@ -34,10 +32,8 @@ class Traveller:
             self.node_count = 0
             self.set_next_node()
 
-
     def inc_route_count(self):
         self.route_count += 1
-
 
     def get_nodes(self):
         return self.graph.nodes
@@ -78,7 +74,7 @@ class Traveller:
         return self.get_current_edge_distance() / self.get_current_speed()
 
     def get_estimated_travel_time(self):
-        return self.get_current_edge_distance() /self.max_speed
+        return self.get_current_edge_distance() / self.max_speed
 
     def get_route(self):
         path = nx.shortest_path(self.graph, self.current_node, self.destination_node, "distance")

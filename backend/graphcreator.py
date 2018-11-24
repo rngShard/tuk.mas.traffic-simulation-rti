@@ -20,7 +20,7 @@ class GraphCreator:
 
     def _init_distances(self):
         for u, v in self.graph.edges:
-            self.graph[u][v]['distance'] = int(random.random() * 1000)
+            self.graph[u][v]['distance'] = int(random.random() * 1000) + 1
             self.graph[u][v]['value'] = self.graph[u][v]["distance"] / 100
 
     def _init_capacities(self):
@@ -42,5 +42,5 @@ class GraphCreator:
 
 
 if __name__ == "__main__":
-    network = GraphCreator(30, 3)
-    network.save_graph("../data/graphs/test_graph.json")
+    network = GraphCreator(30, 2)
+    network.save_graph("../data/graphs/test_graph30_2.json")

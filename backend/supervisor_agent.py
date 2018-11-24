@@ -1,91 +1,9 @@
 import asyncio
-import networkx as nx
+
 from spade.agent import Agent
 from spade.behaviour import CyclicBehaviour
-
-from backend.logger import CarLogger
-from backend.logger import EventLogger
-from backend.logger import PlannerLogger
-from backend.util import build_message, get_timestamp, load_graph
-
-GRAPH_PATH = "../data/graphs/test_graph.json"
-
-
-class Supervisor:
-
-    def __init__(self):
-        self.graph = load_graph(GRAPH_PATH)
-        self.free_flow_speed = 100
-        self.congestion_speed = 20
-        self.init_travel_time()
-        self.traveller_state_dict = {}
-        self.car_logger = CarLogger()
-        self.planner_logger = PlannerLogger()
-        self.event_logger = EventLogger()
-
-    def init_travel_time(self):
-        for edge in self.graph.edges:
-            self.update_travel_time(edge[0], edge[1])
-
-    def update_travel_time(self, node_i, node_j):
-        edge_data = self.graph.get_edge_data(node_i, node_j)
-        distance = edge_data["distance"]
-        capacity = edge_data["capacity"]
-        density = edge_data["density"]
-        factor = edge_data["factor"]
-
-        if density <= capacity:
-            # cost = self.free_flow_speed
-            speed = self.free_flow_speed
-        else:
-            # cost = density / (-self.congestion_speed * (density - capacity) + self.free_flow_speed * capacity)
-            speed = (-self.congestion_speed * (density - capacity) + self.free_flow_speed * capacity) / density
-        if factor is not None:
-            speed = speed * factor
-        if speed < 10:
-            speed = 10
-        self.graph[node_i][node_j]["travel_time"] = distance / speed * 1000
-        self.graph[node_i][node_j]["speed"] = speed
-
-    def set_factor(self, node_i, node_j, factor):
-        self.graph[node_i][node_j]["factor"] = factor
-
-    def delete_factor(self, node_i, node_j):
-        self.graph[node_i][node_j]["factor"] = None
-
-    def increment_density(self, node_i, node_j):
-        self.graph[node_i][node_j]["density"] += 1
-
-    def decrement_density(self, node_i, node_j):
-        self.graph[node_i][node_j]["density"] -= 1
-
-    def get_route(self, current_node, destination_node):
-        path = nx.shortest_path(self.graph, current_node, destination_node, "travel_time")
-        return path
-
-    def get_speed(self, node_i, node_j):
-        return self.graph[node_i][node_j]["speed"]
-
-    def get_distance(self, node_i, node_j):
-        return self.graph[node_i][node_j]["distance"]
-
-    def get_travel_time(self, node_i, node_j):
-        return self.graph[node_i][node_j]["travel_time"]
-
-    def get_route_travel_time(self, route):
-        travel_times = []
-        for key, node in enumerate(route):
-            try:
-                next_node = route[key + 1]
-            except IndexError:
-                break
-            travel_time = self.get_travel_time(node, next_node)
-            travel_times.append(travel_time)
-        return travel_times
-
-    def estimate_travel_time(self, agent_id):
-        traveller_state = self.traveller_state_dict[agent_id]
-        return self.get_distance(traveller_state[2], traveller_state[3]) / traveller_state[4] * 1000
+from util import build_message, get_timestamp
+from supervisor import Supervisor
 
 
 class SupervisorAgent(Agent):
@@ -94,7 +12,7 @@ class SupervisorAgent(Agent):
             pass
 
         async def on_end(self):
-            graph_name = GRAPH_PATH.split("/")[-1].split(".")[0]
+            graph_name = self.agent.supervisor.graph_path.split("/")[-1].split(".")[0]
             self.agent.supervisor.car_logger.write_log(graph_name, "carAgents")
             self.agent.supervisor.planner_logger.write_log(graph_name, "plannerAgent")
             self.agent.supervisor.event_logger.write_log(graph_name, "events")
@@ -234,8 +152,11 @@ class SupervisorAgent(Agent):
 
                 await asyncio.sleep(0)
 
+    def __init__(self, host, pw, network):
+        Agent.__init__(self, host, pw)
+        self.supervisor = Supervisor(network)
+
     def setup(self):
-        self.supervisor = Supervisor()
         print("ReceiverAgent started")
         b = self.RecvRequestBehav()
         self.add_behaviour(b)
