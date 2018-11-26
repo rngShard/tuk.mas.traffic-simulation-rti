@@ -61,7 +61,8 @@ Run:
 ```
 python simulation.py
 ```
-The simulation has to be stopped with strg + c.
+The simulation has to be stopped with a KeyboardInterrupt
+(strg + c) when the simulation is over.
 
 
 
