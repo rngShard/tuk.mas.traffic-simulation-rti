@@ -3,8 +3,8 @@ import asyncio
 from spade.agent import Agent
 from spade.behaviour import FSMBehaviour, State
 
-from backend.traveller import Traveller
-from backend.util import build_message, get_timestamp
+from traveller import Traveller
+from util import build_message, get_timestamp
 
 SUPERVISOR_AGENT = "supervisor@localhost"
 
@@ -160,9 +160,9 @@ class StateFinal(State):
 
 
 class TravellerAgent(Agent):
-    def __init__(self, host, pw, num_routes, agent_type="global", start_node=None, destination_node=None, loop=None):
+    def __init__(self, host, pw, network, num_routes, agent_type="global", start_node=None, destination_node=None, loop=None):
         Agent.__init__(self, host, pw, loop=loop)
-        self.traveller = Traveller(num_routes, agent_type, start_node, destination_node)
+        self.traveller = Traveller(network, num_routes, agent_type, start_node, destination_node)
 
     def setup(self):
         print("TravellerAgent started")

@@ -120,7 +120,7 @@ The graph-drawing utilizes D3's dynamic visualization procedure to create a forc
 Animations are created by transform-operations on svg-elements on the canvases.
 
 Regarding concrete visualization of simulation-run events:
-Agents are drawn as circles of similar shape compared to nodes (as they are initially spawned on top of nodes of the network, thus maintaining similarity is intuitive) with borders indicating the type of (car-)agent displayed ("local" / "semi-local" / "global") and body colors ranging in the randomly interpolated blue spectrum.
+Agents are drawn as circles of similar shape compared to nodes (as they are initially spawned on top of nodes of the network, thus maintaining similarity is intuitive) with borders indicating the type of (car-)agent displayed ("local" / "global") and body colors ranging in the randomly interpolated blue spectrum.
 Upon path-scheduling by the planner-agent, the nodes of the identified path are briefly highlighted (increased in shape) in the same color as the agent the path was identified for. Updating paths only based on new link-values without rerouting does not prompt a visual feedback, while rerouting actions prompt similar highlighting as done uponm initialization, but in the respectively interpolated green color spectrum for all nodes included in the new path.
 
 The overall setup of animations is timestamp-based, as the globally initial (smallest) timestep in the car-agents-log is identified and set as \textit{time-0}, to then set timeouts for all other log entries based on the difference in timestamp values to this zero-time.

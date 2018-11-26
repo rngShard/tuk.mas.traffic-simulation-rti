@@ -1,3 +1,11 @@
 \section{Conclusion}\label{sec:conclusion}
 
-TODO write conclusion-section
+The setup of multi-agent system traffic simulation is feasible from a coordination and implementation standpoint, where the multi-agent characteristic well approximates the simulation behavior. The decision of logging agent-like information rather than a timestep itterative approach made the subsequent visualization and performance calculation more straight-forward to implement and utilizing results in the car-agent's context was less of an abstract sequence-like implementation.
+
+The interaction of different technology - Python backend and JavaScript frontend with intermediate json and custom log-file format - was mostly seamless and notably well separated, such that functionality had not to be collaboratively shared but rather lose specifications regarding information- (not implementation-) format needed to be adhered to.
+
+We showed that car-agent traversing a network of nodes and links perform considerably better when utilizing global network information as compared to local static graph information. The impact of global network-wide events has impact on both groups of agents, where global agents are - whilst being more flexible and resistant in general - still vulnerable to unfortunate circumstances.
+
+The decision to exclude public transport and sharing approaches like car-sharing, whilst being unfortunate regarding an evaluation standpoint, was directly motivated by complexity constraints regarding a unified architecture. This well resembles specifications of available framework solutions and with the here depicted setup focusing on a novel multi-agent system implementation, running car-agent simulations ensured enough of complexity to allow for evaluation whilst also making the architecture more intuitive to connect and utilize.
+
+Future work may include dedicated performance output formating, a more refined in-depth visualization procedure that allows focusing on specific vehicles at a given point in time and inclusion of timestep-based simulation to incorporate schedules and timetables for sharing and public transport agents.

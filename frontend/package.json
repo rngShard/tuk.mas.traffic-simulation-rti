@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "DEBUG=App nodemon ./bin/www",
+    "start": "node ./bin/www",
     "stop": "pkill --signal SIGINT procTitle"
   },
   "dependencies": {
