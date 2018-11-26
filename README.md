@@ -7,6 +7,8 @@ This repository holds implementations for
 
 as well as connected fundamental- and output data, together with Latex sources for the respective written report regarding "Traffic Simulation based on Real-Time Information".
 
+Please be aware, that the simulation is built and tested on Ubuntu 18.04.
+
 Project work conducted by _Konstantin Kloster_ & _Oliver Berg_ regarding project assignment of the lecture *Multi-Agent Systems* in summer term 2018 at University of Kaiserslautern (TU Kaiserslautern), Germany.
 
 ## Project Structure
@@ -14,9 +16,9 @@ Project work conducted by _Konstantin Kloster_ & _Oliver Berg_ regarding project
 Please find this project's sub-modules in their respective folders:
 
 - NodeJS-based frontend simulator visualization application in `frontend/`
-  - contains **instructions how to start web-based UI**
+    - contains **instructions how to start web-based UI**
 - Python MAS simulator in `backend/`
-  - contains **instructions how to start simulator**
+    - contains **instructions how to start simulator**
 - utilized data / logging files (generated from backend, util. in frontend) in `data/`
 - Latex project report in `report/`
 
